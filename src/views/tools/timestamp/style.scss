@@ -1,0 +1,83 @@
+.ts-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+
+  &__input {
+    flex: 1;
+    min-width: 220px;
+  }
+}
+
+.ts-result {
+  margin-top: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+
+  &__note {
+    font-size: var(--font-sm);
+    color: var(--color-text-muted);
+  }
+
+  &__line {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    padding: 8px 12px;
+    background: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+  }
+
+  &__label {
+    flex-shrink: 0;
+    width: 90px;
+    font-size: var(--font-sm);
+    color: var(--color-text-secondary);
+  }
+
+  &__value {
+    font-family: var(--font-mono);
+    font-size: var(--font-md);
+    word-break: break-all;
+  }
+}
+
+.ts-error {
+  margin-top: var(--space-2);
+  font-size: var(--font-sm);
+  color: var(--color-danger);
+}
+
+.ts-examples {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+
+  &__label {
+    font-size: var(--font-sm);
+    color: var(--color-text-muted);
+  }
+
+  &__btn {
+    padding: 3px 10px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
+    font-size: var(--font-sm);
+    color: var(--color-text-secondary);
+    transition:
+      background-color 0.15s ease,
+      color 0.15s ease,
+      border-color 0.15s ease;
+
+    &:hover {
+      background: var(--color-primary-soft);
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+    }
+  }
+}

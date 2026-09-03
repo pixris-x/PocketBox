@@ -1,0 +1,51 @@
+.strength-meter {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  &__track {
+    flex: 1;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--color-surface-2);
+    overflow: hidden;
+  }
+
+  &__fill {
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.25s ease, background-color 0.25s ease;
+
+    &.is-level-0 {
+      background: var(--color-danger);
+    }
+    &.is-level-1 {
+      background: var(--color-warning);
+    }
+    &.is-level-2 {
+      background: var(--color-success);
+    }
+    &.is-level-3 {
+      background: var(--color-primary);
+    }
+  }
+
+  &__label {
+    flex-shrink: 0;
+    font-size: var(--font-sm);
+    color: var(--color-text-secondary);
+
+    &.is-level-0 {
+      color: var(--color-danger);
+    }
+    &.is-level-1 {
+      color: var(--color-warning);
+    }
+    &.is-level-2 {
+      color: var(--color-success);
+    }
+    &.is-level-3 {
+      color: var(--color-primary);
+    }
+  }
+}

@@ -1,0 +1,61 @@
+// ============================================================
+// 公共 SCSS 混入（编译期函数，随 vite additionalData 全局注入）
+// ============================================================
+
+// 水平垂直居中
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// 两端对齐
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+// 文本溢出省略
+@mixin ellipsis($lines: 1) {
+  @if $lines == 1 {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  } @else {
+    display: -webkit-box;
+    -webkit-line-clamp: $lines;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+// 可访问性焦点环
+@mixin focus-ring {
+  outline: none;
+  &:focus-visible {
+    box-shadow: 0 0 0 3px var(--color-primary-soft);
+  }
+}
+
+// 统一样式滚动条
+@mixin scrollbar {
+  @supports (scrollbar-width: thin) {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border-strong) transparent;
+  }
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: var(--color-border-strong);
+    border-radius: 999px;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: var(--color-text-muted);
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}

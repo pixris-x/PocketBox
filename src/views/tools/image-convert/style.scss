@@ -1,0 +1,24 @@
+.image-tool__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+
+  &-actions {
+    display: flex;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+  }
+}
+
+.image-tool__count {
+  font-size: var(--font-sm);
+  color: var(--color-text-secondary);
+}
+
+.image-tool__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}

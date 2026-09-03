@@ -1,0 +1,26 @@
+.ui-section {
+  &.is-spaced + &.is-spaced,
+  & + & {
+    margin-top: var(--space-6);
+  }
+
+  &__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-4);
+    margin-bottom: var(--space-3);
+  }
+
+  &__title {
+    font-size: var(--font-lg);
+    font-weight: 600;
+    color: var(--color-text);
+  }
+
+  &__desc {
+    margin-top: 2px;
+    font-size: var(--font-sm);
+    color: var(--color-text-secondary);
+  }
+}

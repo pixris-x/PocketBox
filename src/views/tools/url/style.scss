@@ -1,0 +1,26 @@
+.url-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin: var(--space-4) 0;
+
+  &__option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: var(--font-sm);
+    color: var(--color-text-secondary);
+  }
+}
+
+.url-error {
+  margin-top: var(--space-2);
+  font-size: var(--font-sm);
+  color: var(--color-danger);
+}
+
+.url-actions {
+  margin-top: var(--space-3);
+}

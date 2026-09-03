@@ -1,0 +1,40 @@
+.tool-shell {
+  max-width: 860px;
+  margin: 0 auto;
+
+  &__back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: var(--space-5);
+    font-size: var(--font-sm);
+    color: var(--color-text-secondary);
+    transition: color 0.15s ease;
+
+    &:hover {
+      color: var(--color-primary);
+    }
+  }
+
+  &__header {
+    margin-bottom: var(--space-6);
+  }
+
+  &__title {
+    font-size: var(--font-2xl);
+    font-weight: 700;
+    color: var(--color-text);
+  }
+
+  &__desc {
+    margin-top: var(--space-2);
+    font-size: var(--font-md);
+    color: var(--color-text-secondary);
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+  }
+}

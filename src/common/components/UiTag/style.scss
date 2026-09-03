@@ -1,0 +1,33 @@
+.ui-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 22px;
+  padding: 0 9px;
+  border-radius: var(--radius-full);
+  font-size: var(--font-xs);
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+
+  &--neutral {
+    background: var(--color-surface-2);
+    color: var(--color-text-secondary);
+  }
+  &--primary {
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+  }
+  &--success {
+    background: var(--color-success-soft);
+    color: var(--color-success);
+  }
+  &--warning {
+    background: var(--color-warning-soft);
+    color: var(--color-warning);
+  }
+  &--danger {
+    background: var(--color-danger-soft);
+    color: var(--color-danger);
+  }
+}

@@ -1,0 +1,12 @@
+.ui-divider {
+  height: 1px;
+  background: var(--color-border);
+  margin: var(--space-4) 0;
+
+  &.is-vertical {
+    width: 1px;
+    height: auto;
+    margin: 0 var(--space-3);
+    align-self: stretch;
+  }
+}
