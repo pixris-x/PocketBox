@@ -7,5 +7,10 @@ services:
     container_name: webtool
     restart: unless-stopped
     ports:
-      # 宿主机端口:容器端口 —— 改左边数字即可换端口，例如 "3000:80"
-      - "8701:80"
+      # 宿主机端口:容器端口 —— 宿主机 nginx 反代指向这个端口
+      - "8701:3000"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3

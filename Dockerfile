@@ -1,7 +1,8 @@
 # ============================================================
 # 口袋工具箱 PocketBox — 多阶段构建
 # 阶段 1：node 安装依赖并构建 dist/
-# 阶段 2：nginx 仅托管构建产物（镜像小、无 node 运行时）
+# 阶段 2：node 仅托管静态文件（deploy/server.js，零依赖）
+# nginx 由宿主机负责，容器只做静态托管，通过反代对外服务
 # ============================================================
 
 # ---------- 构建阶段 ----------
@@ -20,14 +21,17 @@ COPY . .
 RUN pnpm build
 
 # ---------- 运行阶段 ----------
-FROM nginx:alpine
+FROM node:22-alpine
 
-# 构建产物放到 nginx 默认静态目录
-COPY --from=build /app/dist /usr/share/nginx/html
+WORKDIR /app
 
-# 自定义站点配置（含 History 路由 fallback）
-COPY deploy/nginx.conf /etc/nginx/conf.d/default.conf
+ENV NODE_ENV=production \
+    PORT=3000
 
-EXPOSE 80
+# 只拷贝构建产物与服务器脚本，不带入 node_modules / 源码
+COPY --from=build /app/dist ./dist
+COPY deploy/server.js ./deploy/server.js
 
-CMD ["nginx", "-g", "daemon off;"]
+EXPOSE 3000
+
+CMD ["node", "deploy/server.js"]

@@ -102,7 +102,7 @@ src/
   }
   ```
 
-- **Docker**（推荐）：仓库已带 `Dockerfile`、`docker-compose.yml`、`deploy/nginx.conf`，多阶段构建 —— 容器内完成 `pnpm install` + `pnpm build`，最终镜像只含 nginx 与静态产物，**宿主机无需安装 Node**。
+- **Docker + 宿主机 Nginx 反代（推荐）**：容器内完成 `pnpm install` + `pnpm build`，用零依赖的 Node 静态服务器（`deploy/server.js`）托管 `dist/` 并自带 SPA fallback；**容器里没有 nginx**，gzip / 安全头 / HTTPS 全部由宿主机 nginx 反向代理层负责。宿主机无需安装 Node。
 
   ```bash
   docker compose up -d --build   # 构建并后台启动
@@ -110,9 +110,9 @@ src/
   docker compose down            # 停止并移除容器
   ```
 
-  默认映射到宿主机 **8080** 端口（`http://localhost:8080`），改 `docker-compose.yml` 中 `ports` 左侧数字即可换端口。
+  默认映射到宿主机 **8701** 端口，改 `docker-compose.yml` 中 `ports` 左侧数字即可换端口。然后把 `deploy/nginx.conf` 放进宿主机 nginx（改 `server_name` 与 `proxy_pass` 端口），reload 即可；HTTPS 建议 `certbot --nginx -d your.domain.com` 自动生成。
 
-  > `deploy/nginx.conf` 里的 `try_files $uri $uri/ /index.html;` 是 History 路由的命脉，删掉后子路由刷新会拿到 Nginx 默认 404。
+  > `deploy/server.js` 的 SPA fallback 是 History 路由的命脉：无扩展名的未知路径回退 `index.html` 交给前端路由渲染 404 页，带扩展名的真实 404。若改用宿主机 nginx 直接托管 `dist/`（不经容器），则改用上文静态托管的 `try_files` 配置。
 - **GitHub Pages**：放一份与 `index.html` 内容相同的 `404.html`
 
 > 注意：History 路由 + 绝对 base 意味着**不能用 `file://` 直接打开** `dist/index.html`，必须经由 HTTP 服务器。JavaScript 压缩工具使用 Web Worker，同样需要 HTTP 环境。开发时 `pnpm dev` 自带 fallback，无需额外配置。
