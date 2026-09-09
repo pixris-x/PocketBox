@@ -4,9 +4,9 @@
 // 本文件通过 vite.config.js additionalData 全局注入，可直接使用
 // ============================================================
 
-// ---- 品牌色（仅编译期常量，运行时请用 var(--color-xxx)）----
-$color-primary: #3b82f6;
-$color-primary-hover: #2563eb;
+// ---- 品牌色（编译期常量；运行时请用 var(--color-xxx)，并随 data-accent 变化）----
+$color-primary: #f97316;
+$color-primary-hover: #ea580c;
 $color-success: #10b981;
 $color-warning: #d97706;
 $color-danger: #ef4444;
@@ -46,5 +46,6 @@ $header-height: 56px;
 $container-max: 1200px;
 
 // ---- z-index ----
+$z-header: 50;
 $z-toast: 1000;
 $z-modal: 100;

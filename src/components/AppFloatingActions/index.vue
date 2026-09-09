@@ -1,9 +1,6 @@
 <script setup>
-// 右下角悬浮操作按钮：主题切换 + 返回顶部
+// 右下角悬浮按钮：返回顶部（主题切换入口在 AppHeader）
 import { onBeforeUnmount, onMounted, ref } from 'vue'
-import { useTheme } from '@/common/utils/theme'
-
-const { isDark, toggle } = useTheme()
 
 const SCROLL_THRESHOLD = 150
 const showBackTop = ref(false)
@@ -35,15 +32,6 @@ onBeforeUnmount(() => window.removeEventListener('scroll', onScroll))
       @click="backToTop"
     >
       <UiIcon name="chevron-up" :size="20" />
-    </button>
-    <button
-      type="button"
-      class="fab fab--theme"
-      :aria-label="isDark ? '切换到浅色模式' : '切换到深色模式'"
-      :title="isDark ? '浅色模式' : '深色模式'"
-      @click="toggle"
-    >
-      <UiIcon :name="isDark ? 'sun' : 'moon'" :size="20" />
     </button>
   </div>
 </template>

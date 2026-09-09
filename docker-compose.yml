@@ -1,0 +1,11 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: webtool:latest
+    container_name: webtool
+    restart: unless-stopped
+    ports:
+      # 宿主机端口:容器端口 —— 改左边数字即可换端口，例如 "3000:80"
+      - "8701:80"

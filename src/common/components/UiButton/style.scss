@@ -59,7 +59,7 @@
   // ---- 变体 ----
   &--primary {
     background: var(--color-primary);
-    color: #fff;
+    color: var(--color-on-fill);
     &:hover:not(.is-disabled) {
       background: var(--color-primary-hover);
     }
@@ -86,7 +86,7 @@
   }
   &--danger {
     background: var(--color-danger);
-    color: #fff;
+    color: var(--color-on-fill);
     &:hover:not(.is-disabled) {
       filter: brightness(1.08);
     }

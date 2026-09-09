@@ -9,7 +9,7 @@
 - 包管理器：**只用 pnpm**，不得使用 npm / yarn，也不得混用。
 - 语言：**只用 JavaScript（ESM）+ SCSS（dart-sass）**。**禁止引入 TypeScript**（不得添加 .ts/.tsx 文件或 ts 相关依赖）。
 - 新增第三方依赖需评估必要性，并在 `README.md` 的「依赖登记」中记录（名称 / 版本 / 用途）。
-- 构建配置：`base: './'` + Hash 路由，保证构建产物可任意静态托管甚至本地打开。
+- 构建配置：`base: '/'` + History 路由（URL 无 `#`）。**部署时服务端必须配置 SPA fallback**（未知路径回退到 `index.html`），否则子路由刷新会 404。
 
 ## 2. 目录规范
 
@@ -63,8 +63,9 @@ src/
 
 ## 6. 主题
 
-- 明暗主题必须通过 `data-theme` 属性 + CSS 变量实现（定义在 `common/styles/_variables.scss`）。
+- 明暗主题必须通过 `data-theme` 属性 + CSS 变量实现（定义在 `common/styles/_base.scss`）；配色通过 `data-accent` 属性实现，两个维度正交组合（明暗 × 配色）。
 - 主题状态由 `common/utils/theme.js` 统一管理（localStorage 记忆 + 跟随系统）。
+- 新增配色：在 `_base.scss` 追加 `[data-theme='light'][data-accent='<id>']` 与 `[data-theme='dark'][data-accent='<id>']` 两组强调色变量，并在 `theme.js` 的 `ACCENTS` 中登记。
 - **禁止在组件中硬编码颜色值**，一律引用设计 token。
 
 ## 7. 未来后端

@@ -1,6 +1,8 @@
 .tool-shell {
   max-width: 860px;
   margin: 0 auto;
+  // 窄屏兜底：视口比 860px 窄时四周仍保留安全边距，避免内容贴边
+  padding: var(--space-3);
 
   &__back {
     display: inline-flex;

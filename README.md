@@ -1,4 +1,4 @@
-# 本地工具集 (webTool)
+# 口袋工具箱 PocketBox (webTool)
 
 一个纯前端的网页工具站：**Vite + Vue 3 + SCSS**，所有工具都在浏览器本地运行，**数据不会上传到任何服务器**（隐私友好）。
 
@@ -20,7 +20,7 @@
 
 ## 技术栈
 
-- **构建**：Vite 7（`base: './'` + Hash 路由，产物可任意静态托管）
+- **构建**：Vite 7（History 路由，部署需服务端配置 SPA fallback）
 - **框架**：Vue 3（`<script setup>` 组合式 API）+ vue-router 4
 - **语言**：JavaScript + SCSS（dart-sass），不使用 TypeScript
 - **包管理**：pnpm
@@ -63,15 +63,59 @@ src/
 
 ## 主题
 
-明暗主题通过 `html[data-theme]` + CSS 变量切换，由 `common/utils/theme.js` 管理（localStorage 记忆 + 跟随系统）。组件与页面样式一律使用设计 token（`var(--color-*)`），禁止硬编码颜色。
+主题分两个正交维度，都由 `common/utils/theme.js` 管理（localStorage 记忆；明暗默认跟随系统）：
+
+| 维度 | 属性 | 取值 |
+| --- | --- | --- |
+| 明暗 | `html[data-theme]` | `light` / `dark` |
+| 配色 | `html[data-accent]` | `orange` 橙灰（默认）/ `blue` 经典蓝 / `teal` 青绿 |
+
+切换入口在顶栏右侧（配色下拉 + 明暗按钮）。中性色统一走中性灰，强调色随配色变化；成功 / 警告 / 危险等语义色不随配色变化。组件与页面样式一律使用设计 token（`var(--color-*)`），禁止硬编码颜色。
+
+新增配色：在 `_base.scss` 追加 `[data-theme='light'][data-accent='<id>']` 与 `[data-theme='dark'][data-accent='<id>']` 两组变量，并在 `theme.js` 的 `ACCENTS` 中登记即可。
 
 ## 部署
 
-`pnpm build` 产出 `dist/`，为纯静态文件：
+`pnpm build` 产出 `dist/`。项目使用 **History 路由**（URL 无 `#`），服务端必须把未知路径回退到 `index.html`，否则在 `/tool/password` 这类子路由刷新会 404：
 
-- GitHub Pages / Vercel / Netlify / 任意静态服务器：直接上传 `dist/`；
-- 本地使用：打开 `dist/index.html` 即可（Hash 路由 + 相对路径）。
-- 注意：JavaScript 压缩工具使用 Web Worker，`file://` 协议下浏览器会限制 Worker，建议部署到静态服务器使用。
+- **Netlify**：`dist/_redirects` 写入 `/* /index.html 200`
+- **Vercel**：`vercel.json` 配置 `{ "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }] }`
+- **Nginx**（直接托管静态文件，或作为反向代理后端的静态容器，配置相同）：
+
+  ```nginx
+  server {
+      listen 80;
+      server_name your.domain;
+      root /var/www/webtool;   # dist/ 的内容
+      index index.html;
+
+      # 带 hash 的构建产物可长期缓存
+      location /assets/ {
+          expires 1y;
+          add_header Cache-Control "public, immutable";
+      }
+
+      # History 路由关键：未知路径回退到 index.html，由前端路由渲染 404 页
+      location / {
+          try_files $uri $uri/ /index.html;
+      }
+  }
+  ```
+
+- **Docker**（推荐）：仓库已带 `Dockerfile`、`docker-compose.yml`、`deploy/nginx.conf`，多阶段构建 —— 容器内完成 `pnpm install` + `pnpm build`，最终镜像只含 nginx 与静态产物，**宿主机无需安装 Node**。
+
+  ```bash
+  docker compose up -d --build   # 构建并后台启动
+  docker compose logs -f         # 查看日志
+  docker compose down            # 停止并移除容器
+  ```
+
+  默认映射到宿主机 **8080** 端口（`http://localhost:8080`），改 `docker-compose.yml` 中 `ports` 左侧数字即可换端口。
+
+  > `deploy/nginx.conf` 里的 `try_files $uri $uri/ /index.html;` 是 History 路由的命脉，删掉后子路由刷新会拿到 Nginx 默认 404。
+- **GitHub Pages**：放一份与 `index.html` 内容相同的 `404.html`
+
+> 注意：History 路由 + 绝对 base 意味着**不能用 `file://` 直接打开** `dist/index.html`，必须经由 HTTP 服务器。JavaScript 压缩工具使用 Web Worker，同样需要 HTTP 环境。开发时 `pnpm dev` 自带 fallback，无需额外配置。
 
 ## 未来后端（.NET 10 + PostgreSQL）
 
@@ -88,7 +132,7 @@ v1 为纯前端、无任何请求外发。如需后端 / 数据持久化（例�
 | vue | ^3.5 | 框架 |
 | vue-router | ^4.5 | 路由 |
 | js-md5 | ^0.8 | MD5 摘要 |
-| terser | ^5.36 | JavaScript 压缩（浏览器 bundle，Worker 运行） |
+| terser | ^5.36 | JavaScript 压缩（Vite `?worker` 打包，Worker 中运行） |
 | vite | ^7 | 构建 |
 | @vitejs/plugin-vue | ^6 | Vue SFC 编译 |
 | sass | ^1.80 | SCSS 编译 |

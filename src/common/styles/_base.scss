@@ -6,11 +6,18 @@
 :root {
   color-scheme: light;
 
-  // 品牌色
-  --color-primary: #3b82f6;
-  --color-primary-hover: #2563eb;
-  --color-primary-active: #1d4ed8;
-  --color-primary-soft: rgba(59, 130, 246, 0.12);
+  // 中性色（zinc 中性灰）
+  --color-text: #27272a;
+  --color-text-secondary: #71717a;
+  --color-text-muted: #a1a1aa;
+  --color-border: #e4e4e7;
+  --color-border-strong: #d4d4d8;
+  --color-bg: #f4f4f5;
+  --color-surface: #ffffff;
+  --color-surface-2: #fafafa;
+  --color-surface-hover: #f0f0f2;
+
+  // 语义色（成功 / 警告 / 危险，不随配色切换）
   --color-success: #10b981;
   --color-success-soft: rgba(16, 185, 129, 0.12);
   --color-warning: #d97706;
@@ -18,16 +25,15 @@
   --color-danger: #ef4444;
   --color-danger-soft: rgba(239, 68, 68, 0.12);
 
-  // 中性色
-  --color-text: #1f2937;
-  --color-text-secondary: #6b7280;
-  --color-text-muted: #9ca3af;
-  --color-border: #e5e7eb;
-  --color-border-strong: #d1d5db;
-  --color-bg: #f6f8fb;
-  --color-surface: #ffffff;
-  --color-surface-2: #f9fafb;
-  --color-surface-hover: #f1f5f9;
+  // 强调色（默认橙灰 / 亮色；完整配色见下方 data-accent 组）
+  --color-primary: #f97316;
+  --color-primary-hover: #ea580c;
+  --color-primary-active: #c2410c;
+  --color-primary-soft: rgba(249, 115, 22, 0.12);
+
+  // 前景与控件色（明暗主题取值一致，无需在 dark 中覆盖）
+  --color-on-fill: #ffffff; // 主色 / 危险色等实心背景上的前景
+  --color-knob: #ffffff; // 开关与滑块的圆钮
 
   // 间距
   --space-1: 4px;
@@ -46,9 +52,9 @@
   --radius-full: 999px;
 
   // 阴影
-  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
-  --shadow-md: 0 4px 14px rgba(15, 23, 42, 0.08);
-  --shadow-lg: 0 14px 36px rgba(15, 23, 42, 0.13);
+  --shadow-sm: 0 1px 2px rgba(24, 24, 27, 0.06);
+  --shadow-md: 0 4px 14px rgba(24, 24, 27, 0.08);
+  --shadow-lg: 0 14px 36px rgba(24, 24, 27, 0.13);
 
   // 字号
   --font-xs: 12px;
@@ -68,10 +74,17 @@
 [data-theme='dark'] {
   color-scheme: dark;
 
-  --color-primary: #60a5fa;
-  --color-primary-hover: #3b82f6;
-  --color-primary-active: #2563eb;
-  --color-primary-soft: rgba(96, 165, 250, 0.16);
+  // 中性色（深色中性灰）
+  --color-text: #e4e4e7;
+  --color-text-secondary: #a1a1aa;
+  --color-text-muted: #71717a;
+  --color-border: #3f3f46;
+  --color-border-strong: #52525b;
+  --color-bg: #18181b;
+  --color-surface: #27272a;
+  --color-surface-2: #232326;
+  --color-surface-hover: #323236;
+
   --color-success: #34d399;
   --color-success-soft: rgba(52, 211, 153, 0.16);
   --color-warning: #fbbf24;
@@ -79,19 +92,52 @@
   --color-danger: #f87171;
   --color-danger-soft: rgba(248, 113, 113, 0.16);
 
-  --color-text: #e5e7eb;
-  --color-text-secondary: #9ca3af;
-  --color-text-muted: #64748b;
-  --color-border: #2b3a50;
-  --color-border-strong: #3c4f6d;
-  --color-bg: #0b1220;
-  --color-surface: #131e30;
-  --color-surface-2: #182540;
-  --color-surface-hover: #1d2c49;
-
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
   --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.45);
   --shadow-lg: 0 14px 36px rgba(0, 0, 0, 0.5);
+}
+
+// ---------- 配色（data-accent）：明暗 × 配色 两个正交维度 ----------
+// 橙灰（默认）
+[data-theme='light'][data-accent='orange'] {
+  --color-primary: #f97316;
+  --color-primary-hover: #ea580c;
+  --color-primary-active: #c2410c;
+  --color-primary-soft: rgba(249, 115, 22, 0.12);
+}
+[data-theme='dark'][data-accent='orange'] {
+  --color-primary: #fb923c;
+  --color-primary-hover: #f97316;
+  --color-primary-active: #ea580c;
+  --color-primary-soft: rgba(251, 146, 60, 0.18);
+}
+
+// 经典蓝
+[data-theme='light'][data-accent='blue'] {
+  --color-primary: #3b82f6;
+  --color-primary-hover: #2563eb;
+  --color-primary-active: #1d4ed8;
+  --color-primary-soft: rgba(59, 130, 246, 0.12);
+}
+[data-theme='dark'][data-accent='blue'] {
+  --color-primary: #60a5fa;
+  --color-primary-hover: #3b82f6;
+  --color-primary-active: #2563eb;
+  --color-primary-soft: rgba(96, 165, 250, 0.16);
+}
+
+// 青绿
+[data-theme='light'][data-accent='teal'] {
+  --color-primary: #0d9488;
+  --color-primary-hover: #0f766e;
+  --color-primary-active: #115e59;
+  --color-primary-soft: rgba(13, 148, 136, 0.12);
+}
+[data-theme='dark'][data-accent='teal'] {
+  --color-primary: #2dd4bf;
+  --color-primary-hover: #14b8a6;
+  --color-primary-active: #0d9488;
+  --color-primary-soft: rgba(45, 212, 191, 0.18);
 }
 
 // 主题切换时的过渡（由 theme.js 临时挂 .theming 类触发）

@@ -32,7 +32,7 @@
       width: 16px;
       height: 16px;
       border-radius: 50%;
-      background: #fff;
+      background: var(--color-knob);
       border: 2px solid var(--color-primary);
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
       cursor: grab;
@@ -52,7 +52,7 @@
       width: 12px;
       height: 12px;
       border-radius: 50%;
-      background: #fff;
+      background: var(--color-knob);
       border: 2px solid var(--color-primary);
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
       cursor: grab;

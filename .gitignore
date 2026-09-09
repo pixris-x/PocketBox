@@ -9,6 +9,10 @@ dist-ssr/
 .vite/
 *.local
 
+# AI 助手工作目录（本地会话记忆 / 计划，不入库）
+.workbuddy/
+.zcode/
+
 # 编辑器 / 系统
 .DS_Store
 .idea/

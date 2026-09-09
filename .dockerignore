@@ -1,0 +1,12 @@
+# 避免把本地无关文件塞进构建上下文（加快构建、防止缓存失效）
+node_modules
+dist
+dist-ssr
+.git
+.vite
+.workbuddy
+.zcode
+*.local
+Dockerfile
+docker-compose.yml
+README.md

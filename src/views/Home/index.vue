@@ -2,16 +2,15 @@
 // 首页：hero + 工具卡片网格（数据源 data/tools.js）
 import { tools } from '@/data/tools'
 import ToolCard from '@/components/ToolCard/index.vue'
+import BrandLogo from '@/components/BrandLogo/index.vue'
 </script>
 
 <template>
   <div class="home">
     <div class="container">
       <section class="home__hero">
-        <div class="home__hero-icon">
-          <UiIcon name="sparkles" :size="28" />
-        </div>
-        <h1 class="home__hero-title">本地工具集</h1>
+        <BrandLogo class="home__hero-icon" :size="60" />
+        <h1 class="home__hero-title">口袋工具箱</h1>
         <p class="home__hero-desc">
           常用开发与生活小工具集合 · 全部在浏览器本地运行，数据不会上传到任何服务器
         </p>

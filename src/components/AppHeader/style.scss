@@ -1,0 +1,85 @@
+@use '../../common/styles/_variables.scss' as *;
+
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: $z-header;
+  height: $header-height;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+
+  &__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+  }
+
+  &__brand {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--color-text);
+    text-decoration: none;
+
+    &:hover {
+      color: var(--color-primary);
+    }
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-8);
+  }
+
+  &__accent {
+    width: 104px;
+  }
+
+  &__logo {
+    // BrandLogo 自带 2x2 方块图形，这里只做尺寸对齐
+    display: inline-flex;
+  }
+
+  &__title {
+    font-size: var(--font-lg);
+    font-weight: 600;
+    letter-spacing: 0.2px;
+  }
+
+  &__theme {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition:
+      color 0.15s ease,
+      border-color 0.15s ease,
+      background-color 0.15s ease;
+
+    &:hover {
+      color: var(--color-primary);
+      border-color: var(--color-primary);
+      background: var(--color-primary-soft);
+    }
+  }
+}
+
+@media (max-width: 560px) {
+  .app-header {
+    &__accent {
+      width: 88px;
+    }
+
+    &__title {
+      font-size: var(--font-md);
+    }
+  }
+}
