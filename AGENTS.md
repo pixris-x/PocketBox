@@ -20,9 +20,9 @@ src/
 │  ├─ utils/        #   公共函数：index.js 汇总导出
 │  └─ components/   #   ★ 自研 UI 组件库，index.js 统一注册
 ├─ router/          # 路由（由 data/tools.js 自动生成懒加载路由）
-├─ data/            # 工具元数据 tools.js（首页网格 + 路由的唯一数据源）
+├─ data/            # 工具元数据 tools.js（首页网格 + 分类筛选 + 路由的唯一数据源）
 ├─ components/      # 站点级布局组件（AppHeader/AppFooter/AppFloatingActions/
-│                   #   BrandLogo/ToolCard/ToolShell）
+│                   #   AppUpdatePrompt/BrandLogo/ToolCard/ToolShell）
 └─ views/
    ├─ Home/         # 首页（index.vue + style.scss）
    ├─ NotFound/     # 404 页（非工具页，在 router/index.js 手工注册，不进 tools.js）
@@ -36,7 +36,7 @@ src/
 
 ### 2.1 归属原则（重要）
 
-- **可复用的纯算法**（base64 / md5 / json / url / 时间戳 / 复制 / 下载 / 主题）一律进 `common/utils/`。
+- **可复用的纯算法**（base64 / md5 / json / url / 时间戳 / 颜色 / diff / 文本批处理 / 命名风格 / CSV / JWT / 复制 / 下载 / 主题 / Service Worker 更新检测）一律进 `common/utils/`。
 - **页面专属逻辑**（密码生成、Canvas 图片转换、terser worker 封装、页面状态编排）放页面自身 `scripts/` 与 `components/`。
 - **禁止复制粘贴公共函数**到页面目录；需要就用 `import` 引用。
 - 页面文件夹结构约定统一（index.vue + components/ + styles/ + scripts/），某页不涉及某类时允许省略该子目录，但约定不变。
@@ -52,8 +52,10 @@ src/
 
 - 新增一个工具页只需两步：
   1. 在 `src/views/tools/<tool-id>/` 创建页面文件夹；
-  2. 在 `src/data/tools.js` 添加一条元数据（id / 标题 / 描述 / 图标 / 路由）。
-- 首页网格与路由均由 `tools.js` 自动生成，禁止手写路由表或首页卡片。
+  2. 在 `src/data/tools.js` 添加一条元数据（id / 标题 / 描述 / 图标 / 路由 / `category` / `tags`）。
+- `category` 必须取自同文件导出的 `categories`（首页分类筛选项的唯一来源，新增分类在此登记）。
+- `tags` 用于卡片角标展示，同时作为首页关键词搜索的匹配字段。
+- 首页网格、分类筛选与路由均由 `tools.js` 自动生成，禁止手写路由表、首页卡片或分类项。
 
 ## 5. 命名约定
 
