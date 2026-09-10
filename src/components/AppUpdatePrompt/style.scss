@@ -1,0 +1,40 @@
+.update-prompt {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  // 层级：悬浮按钮 90 / 顶部栏 50 之上，弹层 100 与 toast 1000 之下
+  z-index: 95;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  max-width: calc(100vw - 32px);
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-lg);
+
+  &__icon {
+    flex-shrink: 0;
+    color: var(--color-primary);
+  }
+
+  &__text {
+    flex: 1;
+    font-size: var(--font-sm);
+    color: var(--color-text);
+    white-space: nowrap;
+  }
+}
+
+// 窄屏时抬到悬浮按钮上方，避免与右下角的按钮重叠
+@media (max-width: 720px) {
+  .update-prompt {
+    left: 16px;
+    right: 16px;
+    bottom: 78px;
+    max-width: none;
+    transform: none;
+  }
+}

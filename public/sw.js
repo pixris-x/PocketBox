@@ -2,9 +2,12 @@
 // 口袋工具箱 PocketBox — Service Worker（手写，无第三方依赖）
 // 目标：整站离线可用；构建产物带 hash 可长期缓存，页面走网络优先保证更新
 // 注意：本文件位于 public/，构建时原样拷贝到 dist 根目录，作用域为站点根
+// 版本号：下面的占位符由 vite.config.js 的 pocketbox-sw-version 插件在构建期
+//         替换为「package.json 版本 + dist 产物内容指纹」，无需手工维护，
+//         产物一变版本就变，旧缓存必然被 activate 清理。
 // ============================================================
 
-const VERSION = 'v1'
+const VERSION = '__SW_VERSION__'
 const SHELL_CACHE = `pocketbox-shell-${VERSION}`
 const ASSET_CACHE = `pocketbox-assets-${VERSION}`
 

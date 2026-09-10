@@ -2,6 +2,7 @@
 import AppHeader from './components/AppHeader/index.vue'
 import AppFooter from './components/AppFooter/index.vue'
 import AppFloatingActions from './components/AppFloatingActions/index.vue'
+import AppUpdatePrompt from './components/AppUpdatePrompt/index.vue'
 </script>
 
 <template>
@@ -12,6 +13,7 @@ import AppFloatingActions from './components/AppFloatingActions/index.vue'
     </main>
     <AppFooter />
     <AppFloatingActions />
+    <AppUpdatePrompt />
     <UiToast />
   </div>
 </template>
