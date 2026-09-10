@@ -25,7 +25,9 @@ const selectedLabel = computed(() => {
   return found ? found.label : ''
 })
 
-const enabledIndexes = computed(() => props.options.map((o, i) => (o.disabled ? -1 : i)).filter((i) => i >= 0))
+const enabledIndexes = computed(() =>
+  props.options.map((o, i) => (o.disabled ? -1 : i)).filter((i) => i >= 0)
+)
 
 function toggle() {
   if (props.disabled) return
@@ -35,7 +37,9 @@ function toggle() {
 function openPanel() {
   open.value = true
   const selectedIdx = props.options.findIndex((o) => String(o.value) === String(props.modelValue))
-  activeIndex.value = enabledIndexes.value.includes(selectedIdx) ? selectedIdx : (enabledIndexes.value[0] ?? -1)
+  activeIndex.value = enabledIndexes.value.includes(selectedIdx)
+    ? selectedIdx
+    : (enabledIndexes.value[0] ?? -1)
   nextTick(() => {
     measurePlacement()
     scrollActiveIntoView()
@@ -86,11 +90,12 @@ function onKeydown(event) {
       moveActive(-1)
       break
     case 'Enter':
-    case ' ':
+    case ' ': {
       event.preventDefault()
       const opt = props.options[activeIndex.value]
       if (opt && !opt.disabled) select(opt)
       break
+    }
   }
 }
 
@@ -140,7 +145,13 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', onDocumentMouseD
       <UiIcon class="ui-select__arrow" name="chevron-down" :size="16" />
     </button>
 
-    <div v-if="open" ref="panelRef" class="ui-select__panel" :class="{ 'is-upward': upward }" role="listbox">
+    <div
+      v-if="open"
+      ref="panelRef"
+      class="ui-select__panel"
+      :class="{ 'is-upward': upward }"
+      role="listbox"
+    >
       <button
         v-for="(opt, i) in options"
         :key="opt.value"
@@ -159,7 +170,12 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', onDocumentMouseD
         @mouseenter="activeIndex = i"
       >
         <span class="ui-select__option-label">{{ opt.label }}</span>
-        <UiIcon v-if="String(opt.value) === String(modelValue)" class="ui-select__check" name="check" :size="14" />
+        <UiIcon
+          v-if="String(opt.value) === String(modelValue)"
+          class="ui-select__check"
+          name="check"
+          :size="14"
+        />
       </button>
     </div>
   </div>

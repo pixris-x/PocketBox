@@ -4,7 +4,7 @@
 import { ref } from 'vue'
 import UiIcon from '../UiIcon/index.vue'
 
-const props = defineProps({
+defineProps({
   modelValue: { type: [String, Number], default: '' },
   type: { type: String, default: 'text' },
   placeholder: { type: String, default: '' },

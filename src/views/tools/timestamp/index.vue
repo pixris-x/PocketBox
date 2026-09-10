@@ -2,7 +2,6 @@
 // 时间戳 ↔ 日期转换页
 import { ref, computed, watch } from 'vue'
 import ToolShell from '@/components/ToolShell/index.vue'
-import { copyText } from '@/common/utils/copy'
 import {
   tsToDate,
   dateToLocalString,
@@ -58,7 +57,10 @@ function setNow() {
 const examples = [
   { label: '当前时间', value: dateToLocalString(new Date()) },
   { label: '今天 00:00:00', value: dateToLocalString(new Date(new Date().setHours(0, 0, 0, 0))) },
-  { label: '明天 00:00:00', value: dateToLocalString(new Date(new Date().setHours(0, 0, 0, 0) + 86400000)) },
+  {
+    label: '明天 00:00:00',
+    value: dateToLocalString(new Date(new Date().setHours(0, 0, 0, 0) + 86400000)),
+  },
 ]
 
 watch(tsInput, () => {
@@ -77,7 +79,13 @@ watch(tsInput, () => {
     <UiCard>
       <UiSection title="时间戳 → 日期">
         <div class="ts-row">
-          <UiInput v-model="tsInput" placeholder="输入时间戳，如 1700000000" mono clearable class="ts-row__input" />
+          <UiInput
+            v-model="tsInput"
+            placeholder="输入时间戳，如 1700000000"
+            mono
+            clearable
+            class="ts-row__input"
+          />
           <UiSelect v-model="tsMode" :options="tsModeOptions" />
           <UiButton variant="ghost" size="sm" @click="setNow">
             <UiIcon name="clock" :size="14" />
@@ -108,7 +116,13 @@ watch(tsInput, () => {
 
       <UiSection title="日期 → 时间戳">
         <div class="ts-row">
-          <UiInput v-model="dateInput" placeholder="输入日期，如 2023-11-14 22:13:20" mono clearable class="ts-row__input" />
+          <UiInput
+            v-model="dateInput"
+            placeholder="输入日期，如 2023-11-14 22:13:20"
+            mono
+            clearable
+            class="ts-row__input"
+          />
         </div>
         <p v-if="dateError" class="ts-error">{{ dateError }}</p>
 
@@ -125,7 +139,13 @@ watch(tsInput, () => {
 
         <div class="ts-examples">
           <span class="ts-examples__label">快捷示例：</span>
-          <button v-for="ex in examples" :key="ex.label" type="button" class="ts-examples__btn" @click="dateInput = ex.value">
+          <button
+            v-for="ex in examples"
+            :key="ex.label"
+            type="button"
+            class="ts-examples__btn"
+            @click="dateInput = ex.value"
+          >
             {{ ex.label }}
           </button>
         </div>

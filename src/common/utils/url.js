@@ -23,7 +23,7 @@ export function encodeComponent(str, { encodeAll = false } = {}) {
 export function decodeComponent(str) {
   try {
     return { ok: true, value: decodeURIComponent(str.replace(/\+/g, ' ')), error: '' }
-  } catch (err) {
+  } catch {
     return { ok: false, value: '', error: '解码失败：存在非法的 % 转义序列' }
   }
 }

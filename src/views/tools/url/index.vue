@@ -38,12 +38,15 @@ function swap() {
 </script>
 
 <template>
-  <ToolShell
-    title="URL 编码 / 解码"
-    description="对 URL 组件进行编码或解码，支持查询串中的 + 号。"
-  >
+  <ToolShell title="URL 编码 / 解码" description="对 URL 组件进行编码或解码，支持查询串中的 + 号。">
     <UiCard>
-      <UiTabs v-model="mode" :tabs="[{ label: '编码', value: 'encode' }, { label: '解码', value: 'decode' }]" />
+      <UiTabs
+        v-model="mode"
+        :tabs="[
+          { label: '编码', value: 'encode' },
+          { label: '解码', value: 'decode' },
+        ]"
+      />
 
       <div class="url-toolbar">
         <div v-if="mode === 'encode'" class="url-toolbar__option">

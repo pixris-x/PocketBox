@@ -1,0 +1,10 @@
+# 被格式化工具忽略的路径
+dist
+node_modules
+public
+.workbuddy
+.zcode
+pnpm-lock.yaml
+*.svg
+*.ico
+*.png

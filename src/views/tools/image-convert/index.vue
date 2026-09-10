@@ -6,7 +6,13 @@ import ToolShell from '@/components/ToolShell/index.vue'
 import { downloadBlob } from '@/common/utils/download'
 import Dropzone from './components/Dropzone/index.vue'
 import PreviewItem from './components/PreviewItem/index.vue'
-import { loadImage, drawToCanvas, canvasToBlob, mimeFor, formatFromFilename } from './scripts/converter'
+import {
+  loadImage,
+  drawToCanvas,
+  canvasToBlob,
+  mimeFor,
+  formatFromFilename,
+} from './scripts/converter'
 
 const items = ref([])
 

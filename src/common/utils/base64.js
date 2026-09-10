@@ -32,7 +32,9 @@ export function base64ToText(b64) {
 export function cleanBase64(b64) {
   const cleaned = String(b64).trim().replace(/\s+/g, '')
   const comma = cleaned.indexOf(',')
-  return comma > -1 && cleaned.slice(0, comma).includes(';base64') ? cleaned.slice(comma + 1) : cleaned
+  return comma > -1 && cleaned.slice(0, comma).includes(';base64')
+    ? cleaned.slice(comma + 1)
+    : cleaned
 }
 
 /** 校验是否为合法 base64 字符串 */

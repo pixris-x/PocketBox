@@ -44,7 +44,13 @@ async function onFilePicked(event) {
     title="MD5 哈希"
     description="计算文本或文件的 MD5 摘要（32 位十六进制），可用于校验文件完整性。"
   >
-    <UiTabs v-model="mode" :tabs="[{ label: '文本', value: 'text' }, { label: '文件', value: 'file' }]" />
+    <UiTabs
+      v-model="mode"
+      :tabs="[
+        { label: '文本', value: 'text' },
+        { label: '文件', value: 'file' },
+      ]"
+    />
 
     <UiCard v-if="mode === 'text'">
       <UiSection title="输入文本">
@@ -93,7 +99,9 @@ async function onFilePicked(event) {
 
     <UiCard class="md5-warn">
       <UiIcon name="alert-triangle" :size="16" />
-      <p>MD5 已不再安全，仅适用于校验 / 去重等场景；涉及安全或密码存储请使用 SHA-256 等更安全的算法。</p>
+      <p>
+        MD5 已不再安全，仅适用于校验 / 去重等场景；涉及安全或密码存储请使用 SHA-256 等更安全的算法。
+      </p>
     </UiCard>
   </ToolShell>
 </template>

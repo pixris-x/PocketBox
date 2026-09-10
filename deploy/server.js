@@ -20,6 +20,7 @@ const MIME = {
   '.mjs': 'text/javascript; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
   '.json': 'application/json; charset=utf-8',
+  '.webmanifest': 'application/manifest+json; charset=utf-8',
   '.svg': 'image/svg+xml',
   '.png': 'image/png',
   '.jpg': 'image/jpeg',
@@ -68,9 +69,7 @@ const server = http.createServer((req, res) => {
         return send(res, 200, data, {
           'Content-Type': MIME[ext] || 'application/octet-stream',
           // 产物文件名带 hash，强缓存一年；其余文件每次协商校验
-          'Cache-Control': isHashedAsset
-            ? 'public, max-age=31536000, immutable'
-            : 'no-cache',
+          'Cache-Control': isHashedAsset ? 'public, max-age=31536000, immutable' : 'no-cache',
         })
       }
 

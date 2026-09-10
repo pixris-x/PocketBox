@@ -13,7 +13,11 @@ const strength = computed(() => strengthOf(props.bits))
 <template>
   <div class="strength-meter">
     <div class="strength-meter__track">
-      <div class="strength-meter__fill" :class="`is-level-${strength.level}`" :style="{ width: Math.min(100, (bits / 128) * 100) + '%' }" />
+      <div
+        class="strength-meter__fill"
+        :class="`is-level-${strength.level}`"
+        :style="{ width: Math.min(100, (bits / 128) * 100) + '%' }"
+      />
     </div>
     <span class="strength-meter__label" :class="`is-level-${strength.level}`">
       {{ strength.label }}（约 {{ Math.round(bits) }} 位熵）

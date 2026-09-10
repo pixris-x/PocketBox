@@ -54,7 +54,14 @@ generate()
       <UiSection title="生成选项">
         <div class="uuid-row">
           <span class="uuid-row__label">生成数量</span>
-          <UiSlider v-model="count" :min="1" :max="50" :step="1" show-value class="uuid-row__control" />
+          <UiSlider
+            v-model="count"
+            :min="1"
+            :max="50"
+            :step="1"
+            show-value
+            class="uuid-row__control"
+          />
         </div>
         <div class="uuid-row">
           <span class="uuid-row__label">格式</span>
@@ -71,7 +78,11 @@ generate()
         </div>
       </UiSection>
 
-      <UiSection v-if="list.length" title="生成结果" :description="`共 ${list.length} 条，点击右侧按钮复制`">
+      <UiSection
+        v-if="list.length"
+        title="生成结果"
+        :description="`共 ${list.length} 条，点击右侧按钮复制`"
+      >
         <div class="uuid-list">
           <div v-for="(uuid, index) in list" :key="index" class="uuid-item">
             <code class="uuid-item__code">{{ uuid }}</code>

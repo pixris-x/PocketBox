@@ -3,14 +3,14 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: webtool:latest
-    container_name: webtool
+    image: pocketbox:latest
+    container_name: pocketbox
     restart: unless-stopped
     ports:
       # 宿主机端口:容器端口 —— 宿主机 nginx 反代指向这个端口
-      - "8701:3000"
+      - '8701:3000'
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/"]
+      test: ['CMD', 'wget', '-qO-', 'http://127.0.0.1:3000/']
       interval: 30s
       timeout: 5s
       retries: 3

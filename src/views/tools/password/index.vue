@@ -20,7 +20,9 @@ const atLeastOne = ref(true)
 
 const passwords = ref([])
 
-const charset = computed(() => buildCharset(include.value, { excludeAmbiguous: excludeAmbiguous.value }))
+const charset = computed(() =>
+  buildCharset(include.value, { excludeAmbiguous: excludeAmbiguous.value })
+)
 const selectedCount = computed(() => CHARSET_KEYS.filter((key) => include.value[key]).length)
 const bits = computed(() => entropyBits(length.value, charset.value.length))
 
@@ -28,7 +30,12 @@ function generate() {
   if (!charset.value) return
   const list = []
   for (let i = 0; i < count.value; i++) {
-    list.push(generatePassword(length.value, charset.value, { atLeastOne: atLeastOne.value, include: include.value }))
+    list.push(
+      generatePassword(length.value, charset.value, {
+        atLeastOne: atLeastOne.value,
+        include: include.value,
+      })
+    )
   }
   passwords.value = list
 }
@@ -47,12 +54,26 @@ function onCopy(password) {
       <UiSection title="生成选项">
         <div class="option-row">
           <span class="option-label">密码长度</span>
-          <UiSlider v-model="length" :min="8" :max="64" :step="1" show-value class="option-control" />
+          <UiSlider
+            v-model="length"
+            :min="8"
+            :max="64"
+            :step="1"
+            show-value
+            class="option-control"
+          />
         </div>
 
         <div class="option-row">
           <span class="option-label">生成数量</span>
-          <UiSlider v-model="count" :min="1" :max="10" :step="1" show-value class="option-control" />
+          <UiSlider
+            v-model="count"
+            :min="1"
+            :max="10"
+            :step="1"
+            show-value
+            class="option-control"
+          />
         </div>
 
         <div class="option-row">

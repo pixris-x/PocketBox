@@ -56,13 +56,15 @@ function doValidate() {
 </script>
 
 <template>
-  <ToolShell
-    title="JSON 格式化"
-    description="格式化、压缩与校验 JSON 数据，支持按字母排序键。"
-  >
+  <ToolShell title="JSON 格式化" description="格式化、压缩与校验 JSON 数据，支持按字母排序键。">
     <UiCard>
       <UiSection title="输入 JSON">
-        <UiTextarea v-model="input" :rows="10" mono placeholder='粘贴 JSON 数据，例如：{"name":"test","list":[1,2,3]}' />
+        <UiTextarea
+          v-model="input"
+          :rows="10"
+          mono
+          placeholder='粘贴 JSON 数据，例如：{"name":"test","list":[1,2,3]}'
+        />
       </UiSection>
 
       <div class="json-toolbar">

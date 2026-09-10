@@ -1,4 +1,8 @@
 <script setup>
+/* eslint-disable vue/no-mutating-props */
+// item 是父级响应式数组中的元素，用 v-model 直接改字段是本组件既定用法；
+// 改成 emit 回填需重构整条数据链路，收益不抵风险，故整文件禁用该规则。
+//
 // 单张图片转换预览项（页面私有组件）
 // item 由父级持有（含转换结果与状态），本组件仅渲染控制与结果
 import { computed } from 'vue'
@@ -34,7 +38,8 @@ function onDownload() {
       <div class="preview-item__info">
         <p class="preview-item__name" :title="item.file.name">{{ item.file.name }}</p>
         <p class="preview-item__meta">
-          {{ item.originalWidth }}×{{ item.originalHeight }} · 原始 {{ formatBytes(item.file.size) }}
+          {{ item.originalWidth }}×{{ item.originalHeight }} · 原始
+          {{ formatBytes(item.file.size) }}
         </p>
 
         <div class="preview-item__controls">
@@ -102,7 +107,12 @@ function onDownload() {
       </template>
     </div>
 
-    <button type="button" class="preview-item__remove" aria-label="移除" @click="emit('remove', index)">
+    <button
+      type="button"
+      class="preview-item__remove"
+      aria-label="移除"
+      @click="emit('remove', index)"
+    >
       <UiIcon name="close" :size="14" />
     </button>
   </div>

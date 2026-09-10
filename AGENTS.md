@@ -1,6 +1,6 @@
 # AGENTS.md — 项目开发规则（强制约定）
 
-本文件是 `webTool` 项目的开发与维护强制约束，所有新增功能、修复、重构都必须遵守。
+本文件是 `pocketBox` 项目的开发与维护强制约束，所有新增功能、修复、重构都必须遵守。
 任何 Agent（ZCode / Claude Code 等）在为本项目编写代码前，必须先阅读并遵循本规则。
 
 ## 1. 技术栈锁定
@@ -21,9 +21,11 @@ src/
 │  └─ components/   #   ★ 自研 UI 组件库，index.js 统一注册
 ├─ router/          # 路由（由 data/tools.js 自动生成懒加载路由）
 ├─ data/            # 工具元数据 tools.js（首页网格 + 路由的唯一数据源）
-├─ components/      # 站点级布局组件（AppHeader/AppFooter/ToolCard/ToolShell）
+├─ components/      # 站点级布局组件（AppHeader/AppFooter/AppFloatingActions/
+│                   #   BrandLogo/ToolCard/ToolShell）
 └─ views/
    ├─ Home/         # 首页（index.vue + style.scss）
+   ├─ NotFound/     # 404 页（非工具页，在 router/index.js 手工注册，不进 tools.js）
    └─ tools/
       └─ <tool-id>/ # ★ 每个工具页一个独立文件夹
          ├─ index.vue      # 主 vue
@@ -79,3 +81,12 @@ src/
 - 组件一律使用 `<script setup>` 组合式 API。
 - 样式优先 scoped；需要跨组件共享的样式放公共样式文件。
 - 不写与逻辑无关的注释；命名自解释。
+
+## 9. 代码检查与格式
+
+- **ESLint**（`eslint.config.js`，扁平配置）+ **Prettier**（`.prettierrc`），配置文件与忽略规则已就绪。
+- 常用命令：`pnpm lint`（检查）、`pnpm lint:fix`（自动修复）、`pnpm format`（格式化）、`pnpm format:check`（只检查）。
+- **提交前请本地保证 `pnpm lint` 与 `pnpm format:check` 均为零问题**，再执行 `pnpm build` 确认可构建。项目自托管（开发机 Docker + 宿主机 nginx 反代），没有云端 CI，这三步就是发布前的全部门禁。
+- 规则保持克制：只做错误预防与 Vue 基础检查，风格统一交给 Prettier（无分号 / 单引号 / 100 列 / 2 空格）。
+- 确需绕过某条规则时，用行内 `eslint-disable` **并写明原因**，禁止无注释地全局关闭规则。
+- 换行统一 LF（见 `.gitattributes`）。

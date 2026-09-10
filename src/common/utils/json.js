@@ -14,16 +14,18 @@ export function parseJson(text) {
     const posMatch = /position (\d+)/.exec(msg)
     const lineColMatch = /line (\d+) column (\d+)/.exec(msg)
     if (lineColMatch) {
-      throw new Error(`JSON 解析失败：第 ${lineColMatch[1]} 行，第 ${lineColMatch[2]} 列`)
+      throw new Error(`JSON 解析失败：第 ${lineColMatch[1]} 行，第 ${lineColMatch[2]} 列`, {
+        cause: err,
+      })
     }
     if (posMatch) {
       const pos = Number(posMatch[1])
       const before = text.slice(0, pos)
       const line = before.split('\n').length
       const col = pos - before.lastIndexOf('\n')
-      throw new Error(`JSON 解析失败：第 ${line} 行，第 ${col} 列`)
+      throw new Error(`JSON 解析失败：第 ${line} 行，第 ${col} 列`, { cause: err })
     }
-    throw new Error(`JSON 解析失败：${msg}`)
+    throw new Error(`JSON 解析失败：${msg}`, { cause: err })
   }
 }
 
@@ -32,7 +34,9 @@ export function formatJson(text, { indent = 2, sortKeys = false } = {}) {
   const value = parseJson(text)
   return JSON.stringify(
     value,
-    sortKeys ? (_, val) => (val && typeof val === 'object' && !Array.isArray(val) ? sortObject(val) : val) : null,
+    sortKeys
+      ? (_, val) => (val && typeof val === 'object' && !Array.isArray(val) ? sortObject(val) : val)
+      : null,
     indent
   )
 }

@@ -29,7 +29,7 @@ function decodeText() {
   textError.value = ''
   try {
     textOutput.value = base64ToText(textInput.value)
-  } catch (err) {
+  } catch {
     textError.value = '解码失败：输入不是合法的 Base64 字符串'
   }
 }
@@ -71,7 +71,7 @@ function downloadB64File() {
     // 尝试从 data URL 前缀识别 MIME
     const mime = mimeFromDataUrl(b64Input.value.trim()) || 'application/octet-stream'
     downloadBlob(base64ToBlob(b64, mime), outputName.value)
-  } catch (err) {
+  } catch {
     fileError.value = '解码失败：Base64 内容无效'
   }
 }
@@ -82,7 +82,13 @@ function downloadB64File() {
     title="Base64 转换"
     description="文本与文件的 Base64 编码 / 解码。Unicode 安全（UTF-8），支持中文等字符。"
   >
-    <UiTabs v-model="mode" :tabs="[{ label: '文本转换', value: 'text' }, { label: '文件转换', value: 'file' }]" />
+    <UiTabs
+      v-model="mode"
+      :tabs="[
+        { label: '文本转换', value: 'text' },
+        { label: '文件转换', value: 'file' },
+      ]"
+    />
 
     <!-- 文本模式 -->
     <UiCard v-if="mode === 'text'">
@@ -118,14 +124,24 @@ function downloadB64File() {
     <UiCard v-if="mode === 'file'">
       <UiSection title="文件 → Base64">
         <input type="file" accept="*/*" @change="onFilePicked" />
-        <p class="b64-hint">{{ fileName ? `已选择：${fileName}` : '选择一个文件，读取为 Base64 字符串（本地读取，不会上传）' }}</p>
+        <p class="b64-hint">
+          {{
+            fileName
+              ? `已选择：${fileName}`
+              : '选择一个文件，读取为 Base64 字符串（本地读取，不会上传）'
+          }}
+        </p>
         <UiTextarea v-if="fileToB64" :model-value="fileToB64" :rows="6" mono />
         <div v-if="fileToB64" class="b64-actions">
           <UiButton variant="secondary" size="sm" @click="copyFileBase64">
             <UiIcon name="copy" :size="14" />
             复制 Base64
           </UiButton>
-          <UiButton variant="ghost" size="sm" @click="downloadText('base64.txt', fileToB64, 'text/plain;charset=utf-8')">
+          <UiButton
+            variant="ghost"
+            size="sm"
+            @click="downloadText('base64.txt', fileToB64, 'text/plain;charset=utf-8')"
+          >
             <UiIcon name="download" :size="14" />
             下载为 .txt
           </UiButton>
@@ -135,7 +151,12 @@ function downloadB64File() {
       <UiDivider />
 
       <UiSection title="Base64 → 文件">
-        <UiTextarea v-model="b64Input" placeholder="粘贴 Base64 字符串（支持带 data URL 前缀），然后下载解码后的文件…" :rows="4" mono />
+        <UiTextarea
+          v-model="b64Input"
+          placeholder="粘贴 Base64 字符串（支持带 data URL 前缀），然后下载解码后的文件…"
+          :rows="4"
+          mono
+        />
         <div class="b64-row">
           <UiInput v-model="outputName" placeholder="输出文件名" class="b64-row__name" />
           <UiButton @click="downloadB64File">

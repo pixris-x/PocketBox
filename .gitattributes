@@ -1,0 +1,9 @@
+# 统一 LF 换行，避免 Windows 下 core.autocrlf 把整文件变成 CRLF diff
+* text=auto eol=lf
+
+# 二进制资源不做换行转换
+*.png binary
+*.ico binary
+*.jpg binary
+*.jpeg binary
+*.webp binary

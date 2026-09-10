@@ -2,7 +2,7 @@
 // 拖拽 / 点选上传区（页面私有组件）
 import { ref } from 'vue'
 
-const props = defineProps({
+defineProps({
   accept: { type: String, default: 'image/*' },
   multiple: { type: Boolean, default: true },
 })
@@ -51,7 +51,14 @@ function onDragLeave() {
     @dragleave="onDragLeave"
     @drop.prevent="onDrop"
   >
-    <input ref="inputRef" type="file" :accept="accept" :multiple="multiple" hidden @change="onChange" />
+    <input
+      ref="inputRef"
+      type="file"
+      :accept="accept"
+      :multiple="multiple"
+      hidden
+      @change="onChange"
+    />
     <span class="dropzone__icon">
       <UiIcon name="upload" :size="24" />
     </span>

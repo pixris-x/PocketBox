@@ -2,7 +2,7 @@
 // 复选框组件（带 label 插槽）
 import UiIcon from '../UiIcon/index.vue'
 
-const props = defineProps({
+defineProps({
   modelValue: { type: Boolean, default: false },
   disabled: Boolean,
 })

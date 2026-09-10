@@ -30,7 +30,9 @@ const AMBIGUOUS = /[0O1lI]/g
  * @returns {string}
  */
 export function buildCharset(include, { excludeAmbiguous = false } = {}) {
-  let charset = CHARSET_KEYS.filter((key) => include[key]).map((key) => CHARSETS[key]).join('')
+  let charset = CHARSET_KEYS.filter((key) => include[key])
+    .map((key) => CHARSETS[key])
+    .join('')
   if (excludeAmbiguous) charset = charset.replace(AMBIGUOUS, '')
   return charset
 }

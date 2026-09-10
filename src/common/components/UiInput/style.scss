@@ -52,7 +52,9 @@
     height: 18px;
     border-radius: 50%;
     color: var(--color-text-muted);
-    transition: background-color 0.15s ease, color 0.15s ease;
+    transition:
+      background-color 0.15s ease,
+      color 0.15s ease;
 
     &:hover {
       background: var(--color-surface-hover);
