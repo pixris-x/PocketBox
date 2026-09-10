@@ -1,0 +1,83 @@
+.unit {
+  // 分类较多时横向滚动，避免 tab 换行破坏外形
+  &__tabs {
+    max-width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  &__fields {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: var(--space-3);
+    margin-top: var(--space-4);
+  }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    min-width: 180px;
+
+    &-label {
+      font-size: var(--font-xs);
+      color: var(--color-text-secondary);
+    }
+  }
+
+  &__amount {
+    width: 100%;
+  }
+
+  &__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3);
+    background: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+
+    // 源单位行高亮，便于对照
+    &.is-source {
+      background: var(--color-primary-soft);
+      border-color: var(--color-primary);
+    }
+
+    &-label {
+      flex: 0 0 auto;
+      min-width: 128px;
+      font-size: var(--font-xs);
+      color: var(--color-text-secondary);
+    }
+
+    &-value {
+      flex: 1;
+      min-width: 0;
+      font-family: var(--font-mono);
+      font-size: var(--font-sm);
+      color: var(--color-text);
+      overflow-wrap: anywhere;
+    }
+  }
+
+  &__footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: var(--space-3);
+  }
+}

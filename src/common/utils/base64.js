@@ -37,6 +37,20 @@ export function cleanBase64(b64) {
     : cleaned
 }
 
+/**
+ * Base64URL → 文本（UTF-8 安全）
+ * Base64URL 用 - 和 _ 替代 + 和 /，且通常省略末尾的 =，需先还原再解码。
+ * JWT 的各段即使用此编码。
+ * @param {string} input
+ * @returns {string}
+ */
+export function base64UrlToText(input) {
+  const normalised = String(input).trim().replace(/-/g, '+').replace(/_/g, '/')
+  const remainder = normalised.length % 4
+  // 余数为 1 不是合法 base64 长度，补不出正确结果，交给 atob 抛错
+  return base64ToText(remainder ? normalised + '='.repeat(4 - remainder) : normalised)
+}
+
 /** 校验是否为合法 base64 字符串 */
 export function isValidBase64(b64) {
   const cleaned = cleanBase64(b64)

@@ -1,0 +1,113 @@
+.csvjson {
+  &__tabs {
+    max-width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  &__options {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: var(--space-4);
+    margin-top: var(--space-4);
+  }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    min-width: 160px;
+
+    &-label {
+      font-size: var(--font-xs);
+      color: var(--color-text-secondary);
+    }
+  }
+
+  &__warn {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-1);
+    margin-top: var(--space-3);
+    font-size: var(--font-sm);
+    line-height: 1.6;
+    color: var(--color-warning);
+
+    // 图标为 flex 子项时 vertical-align 失效，偏移半个行盒差值对齐首行文字
+    .ui-icon {
+      margin-top: calc((1.6em - 14px) / 2);
+    }
+  }
+
+  &__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    margin-top: var(--space-3);
+  }
+
+  &__hint {
+    font-size: var(--font-xs);
+    color: var(--color-text-muted);
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-left: auto;
+  }
+
+  &__error {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-1);
+    margin-top: var(--space-3);
+    padding: var(--space-3);
+    background: var(--color-danger-soft);
+    border: 1px solid var(--color-danger);
+    border-radius: var(--radius-md);
+    font-size: var(--font-sm);
+    line-height: 1.6;
+    color: var(--color-danger);
+
+    .ui-icon {
+      margin-top: calc((1.6em - 14px) / 2);
+    }
+  }
+
+  &__output {
+    margin-top: var(--space-3);
+    padding: var(--space-3);
+    max-height: 380px;
+    overflow: auto;
+    background: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    font-family: var(--font-mono);
+    font-size: var(--font-sm);
+    line-height: 1.6;
+    color: var(--color-text);
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  &__placeholder {
+    margin-top: var(--space-3);
+    padding: var(--space-6) 0;
+    text-align: center;
+    font-size: var(--font-sm);
+    color: var(--color-text-muted);
+  }
+
+  &__submit {
+    margin-left: auto;
+  }
+}

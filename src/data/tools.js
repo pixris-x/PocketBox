@@ -1,9 +1,20 @@
 // ============================================================
 // 工具元数据（唯一数据源）
-// 首页网格与路由均由本文件自动生成。
+// 首页网格、分类筛选与路由均由本文件自动生成。
 // 新增工具：1) 在 views/tools/<id>/ 建页面  2) 在此加一条
 // id: 文件夹名（同时作为路由名），icon: 见 common/components/UiIcon/icons.js
+// category: 必须取自下方 categories 的 id（首页分类筛选依据）
+// tags: 卡片角标展示，同时作为首页搜索的匹配关键词
 // ============================================================
+
+// 工具分类（首页筛选项的唯一来源，数组顺序即展示顺序）
+export const categories = [
+  { id: 'convert', label: '编码转换' },
+  { id: 'generate', label: '生成器' },
+  { id: 'text', label: '文本数据' },
+  { id: 'dev', label: '开发辅助' },
+]
+
 export const tools = [
   {
     id: 'password',
@@ -11,6 +22,7 @@ export const tools = [
     title: '随机强密码生成',
     description: '基于 Web Crypto 的真随机强密码，支持长度与字符集自定义',
     icon: 'key',
+    category: 'generate',
     tags: ['安全'],
   },
   {
@@ -19,6 +31,7 @@ export const tools = [
     title: '图片格式转换',
     description: 'PNG / JPEG / WebP 互转，支持质量调节与等比缩放',
     icon: 'image',
+    category: 'convert',
     tags: ['图片'],
   },
   {
@@ -27,6 +40,7 @@ export const tools = [
     title: 'Base64 转换',
     description: '文本与文件的 Base64 编码 / 解码，Unicode 安全',
     icon: 'code',
+    category: 'convert',
     tags: ['编码'],
   },
   {
@@ -35,6 +49,7 @@ export const tools = [
     title: 'MD5 哈希',
     description: '文本与文件的 MD5 摘要计算，可校验文件一致性',
     icon: 'hash',
+    category: 'dev',
     tags: ['哈希'],
   },
   {
@@ -43,6 +58,7 @@ export const tools = [
     title: 'JavaScript 压缩',
     description: '基于 terser 的 JS 压缩 / 混淆，含压缩前后大小对比',
     icon: 'terminal',
+    category: 'dev',
     tags: ['代码'],
   },
   {
@@ -51,6 +67,7 @@ export const tools = [
     title: 'JSON 格式化',
     description: 'JSON 格式化 / 压缩 / 校验，可选排序键',
     icon: 'braces',
+    category: 'text',
     tags: ['数据'],
   },
   {
@@ -59,6 +76,7 @@ export const tools = [
     title: 'URL 编码 / 解码',
     description: 'URL 组件编码与解码，兼容查询串中的 + 号',
     icon: 'link',
+    category: 'convert',
     tags: ['编码'],
   },
   {
@@ -67,6 +85,7 @@ export const tools = [
     title: '时间戳转换',
     description: 'Unix 时间戳与日期互转，支持本地 / UTC',
     icon: 'clock',
+    category: 'dev',
     tags: ['时间'],
   },
   {
@@ -75,6 +94,7 @@ export const tools = [
     title: 'UUID 生成',
     description: '批量生成 UUID v4，支持大小写切换',
     icon: 'shuffle',
+    category: 'generate',
     tags: ['生成'],
   },
   {
@@ -83,6 +103,7 @@ export const tools = [
     title: '二维码生成',
     description: '文本与链接转二维码，可调纠错级别并导出 PNG',
     icon: 'qrcode',
+    category: 'generate',
     tags: ['生成'],
   },
   {
@@ -91,6 +112,7 @@ export const tools = [
     title: '文本 diff 对比',
     description: '逐行对比两段文本，标出新增与删除的行',
     icon: 'diff',
+    category: 'text',
     tags: ['文本'],
   },
   {
@@ -99,6 +121,7 @@ export const tools = [
     title: '正则测试',
     description: '实时查看正则匹配结果、捕获分组与替换效果',
     icon: 'regex',
+    category: 'text',
     tags: ['文本'],
   },
   {
@@ -107,6 +130,52 @@ export const tools = [
     title: '颜色格式转换',
     description: 'HEX / RGB / HSL 互转，附对比度与可读性参考',
     icon: 'palette',
+    category: 'convert',
     tags: ['转换'],
+  },
+  {
+    id: 'text-toolkit',
+    path: '/tool/text-toolkit',
+    title: '文本批处理',
+    description: '批量清理空白、去空行、去重、排序与大小写转换，附字数行数统计',
+    icon: 'list',
+    category: 'text',
+    tags: ['文本'],
+  },
+  {
+    id: 'naming-convert',
+    path: '/tool/naming-convert',
+    title: '命名风格转换',
+    description: '在 camelCase / snake_case / kebab-case 等八种命名风格间互相转换',
+    icon: 'type',
+    category: 'dev',
+    tags: ['文本'],
+  },
+  {
+    id: 'unit-convert',
+    path: '/tool/unit-convert',
+    title: '单位换算',
+    description: '长度 / 重量 / 面积 / 体积 / 数据存储 / 温度的单位互转，一次列全',
+    icon: 'repeat',
+    category: 'convert',
+    tags: ['换算'],
+  },
+  {
+    id: 'csv-json',
+    path: '/tool/csv-json',
+    title: 'CSV ↔ JSON 互转',
+    description: '表格与 JSON 双向转换，支持引号转义、自定义分隔符与类型推断',
+    icon: 'grid',
+    category: 'text',
+    tags: ['数据'],
+  },
+  {
+    id: 'jwt',
+    path: '/tool/jwt',
+    title: 'JWT 解析',
+    description: '本地解开 Header 与 Payload，标出标准声明与有效期，令牌不外发',
+    icon: 'lock',
+    category: 'dev',
+    tags: ['安全'],
   },
 ]
