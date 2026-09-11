@@ -1,0 +1,103 @@
+.aes-label {
+  display: block;
+
+  &__text {
+    display: block;
+    margin-bottom: var(--space-1);
+    font-size: var(--font-sm);
+    color: var(--color-text-secondary);
+  }
+}
+
+.aes-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border: 0;
+  background: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--color-text-primary);
+  }
+}
+
+.aes-note {
+  margin-top: var(--space-2);
+  font-size: var(--font-sm);
+  color: var(--color-text-muted);
+}
+
+.aes-actions {
+  margin-top: var(--space-3);
+}
+
+.aes-result {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+
+  &__code {
+    flex: 1;
+    min-width: 0;
+    font-family: var(--font-mono);
+    font-size: var(--font-md);
+    word-break: break-all;
+  }
+}
+
+.aes-error {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-1);
+  font-size: var(--font-sm);
+  color: var(--color-danger);
+
+  // 图标为 flex 子项时 vertical-align 失效（全局 svg 是 display: block），
+  // 行盒比图标高，需向下偏移半个差值才能与首行文字中线对齐
+  .ui-icon {
+    margin-top: calc((1.6em - 14px) / 2);
+  }
+}
+
+.aes-blocked {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  background: var(--color-warning-soft);
+  border: 1px solid color-mix(in srgb, var(--color-warning) 30%, transparent);
+  border-radius: var(--radius-md);
+  font-size: var(--font-sm);
+  color: var(--color-text-secondary);
+
+  .ui-icon {
+    margin-top: calc((1.6em - 14px) / 2);
+    color: var(--color-warning);
+  }
+
+  code {
+    font-family: var(--font-mono);
+    font-size: var(--font-xs);
+  }
+}
+
+.aes-tip {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: var(--color-surface-2);
+  color: var(--color-text-secondary);
+  font-size: var(--font-sm);
+
+  .ui-icon {
+    margin-top: calc((1.6em - 16px) / 2);
+    color: var(--color-primary);
+  }
+}

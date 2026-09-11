@@ -85,6 +85,37 @@
     gap: var(--space-4);
   }
 
+  // 浏览态：按分类分组的标题区
+  &__group {
+    margin-bottom: var(--space-7);
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    &-title {
+      display: flex;
+      align-items: baseline;
+      gap: var(--space-2);
+      margin-bottom: var(--space-4);
+      padding-left: var(--space-3);
+      border-left: 3px solid var(--color-primary);
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--color-text);
+    }
+
+    &-name {
+      line-height: 1.2;
+    }
+
+    &-count {
+      font-size: var(--font-sm);
+      font-weight: 400;
+      color: var(--color-text-muted);
+    }
+  }
+
   &__empty {
     display: flex;
     flex-direction: column;

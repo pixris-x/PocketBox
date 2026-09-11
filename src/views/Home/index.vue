@@ -1,5 +1,6 @@
 <script setup>
 // 首页：hero + 搜索 / 分类筛选 + 工具卡片网格（数据源 data/tools.js）
+// 无关键词时按分类分组渲染，每组顶部带小标题；有搜索时扁平聚合
 import { computed, ref } from 'vue'
 import { tools, categories } from '@/data/tools'
 import ToolCard from '@/components/ToolCard/index.vue'
@@ -13,10 +14,12 @@ const tabs = [
   ...categories.map((item) => ({ label: item.label, value: item.id })),
 ]
 
-const isFiltering = computed(() => keyword.value.trim() !== '' || activeCategory.value !== 'all')
+const trimmedKeyword = computed(() => keyword.value.trim())
+const isSearching = computed(() => trimmedKeyword.value !== '')
 
-const filteredTools = computed(() => {
-  const kw = keyword.value.trim().toLowerCase()
+// 搜索匹配的扁平列表（搜索态用）
+const searchedTools = computed(() => {
+  const kw = trimmedKeyword.value.toLowerCase()
   return tools.filter((tool) => {
     if (activeCategory.value !== 'all' && tool.category !== activeCategory.value) return false
     if (!kw) return true
@@ -24,6 +27,24 @@ const filteredTools = computed(() => {
       field.toLowerCase().includes(kw)
     )
   })
+})
+
+// 浏览态分组：按 categories 顺序，过滤后去掉空组
+const groupedTools = computed(() => {
+  const kw = trimmedKeyword.value.toLowerCase()
+  return categories
+    .map((cat) => {
+      const items = tools.filter((tool) => {
+        if (tool.category !== cat.id) return false
+        if (activeCategory.value !== 'all' && tool.category !== activeCategory.value) return false
+        if (!kw) return true
+        return [tool.title, tool.description, tool.id, ...(tool.tags || [])].some((field) =>
+          field.toLowerCase().includes(kw)
+        )
+      })
+      return { id: cat.id, label: cat.label, items }
+    })
+    .filter((group) => group.items.length > 0)
 })
 
 function resetFilter() {
@@ -63,20 +84,34 @@ function resetFilter() {
         </div>
       </section>
 
-      <p v-if="isFiltering && filteredTools.length" class="home__result" aria-live="polite">
-        找到 {{ filteredTools.length }} 个工具
-      </p>
+      <!-- 搜索态：扁平聚合 + 计数 -->
+      <template v-if="isSearching">
+        <p v-if="searchedTools.length" class="home__result" aria-live="polite">
+          找到 {{ searchedTools.length }} 个工具
+        </p>
+        <section v-if="searchedTools.length" class="home__grid">
+          <ToolCard v-for="tool in searchedTools" :key="tool.id" :tool="tool" />
+        </section>
+        <section v-else class="home__empty">
+          <UiIcon name="search" :size="28" />
+          <p class="home__empty-title">没有匹配的工具</p>
+          <p class="home__empty-desc">换个关键词，或清除筛选条件看看全部工具</p>
+          <UiButton variant="secondary" size="sm" @click="resetFilter">清除筛选</UiButton>
+        </section>
+      </template>
 
-      <section v-if="filteredTools.length" class="home__grid">
-        <ToolCard v-for="tool in filteredTools" :key="tool.id" :tool="tool" />
-      </section>
-
-      <section v-else class="home__empty">
-        <UiIcon name="search" :size="28" />
-        <p class="home__empty-title">没有匹配的工具</p>
-        <p class="home__empty-desc">换个关键词，或清除筛选条件看看全部工具</p>
-        <UiButton variant="secondary" size="sm" @click="resetFilter">清除筛选</UiButton>
-      </section>
+      <!-- 浏览态：按分类分组，每组前加标题 -->
+      <template v-else>
+        <section v-for="group in groupedTools" :key="group.id" class="home__group">
+          <h2 class="home__group-title">
+            <span class="home__group-name">{{ group.label }}</span>
+            <span class="home__group-count">{{ group.items.length }}</span>
+          </h2>
+          <div class="home__grid">
+            <ToolCard v-for="tool in group.items" :key="tool.id" :tool="tool" />
+          </div>
+        </section>
+      </template>
     </div>
   </div>
 </template>

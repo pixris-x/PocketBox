@@ -25,6 +25,13 @@
   --color-danger: #ef4444;
   --color-danger-soft: rgba(239, 68, 68, 0.12);
 
+  // JSON 语法高亮（固定色，不随配色切换）
+  --color-json-key: #157347; // 键名（深绿加粗）
+  --color-json-string: #c2410c; // 字符串值
+  --color-json-number: #1d4ed8; // 数字与布尔值
+  --color-json-null: #6b7280; // null
+  --color-json-line: #d4d4d8; // 层级缩进虚线
+
   // 强调色（默认橙灰 / 亮色；完整配色见下方 data-accent 组）
   --color-primary: #f97316;
   --color-primary-hover: #ea580c;
@@ -93,6 +100,13 @@
   --color-warning-soft: rgba(251, 191, 36, 0.16);
   --color-danger: #f87171;
   --color-danger-soft: rgba(248, 113, 113, 0.16);
+
+  // JSON 语法高亮（暗色提亮）
+  --color-json-key: #4ade80;
+  --color-json-string: #fb923c;
+  --color-json-number: #60a5fa;
+  --color-json-null: #9ca3af;
+  --color-json-line: #52525b;
 
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
   --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.45);

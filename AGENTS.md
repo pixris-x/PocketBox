@@ -36,7 +36,7 @@ src/
 
 ### 2.1 归属原则（重要）
 
-- **可复用的纯算法**（base64 / md5 / json / url / 时间戳 / 颜色 / diff / 文本批处理 / 命名风格 / CSV / JWT / 复制 / 下载 / 主题 / Service Worker 更新检测）一律进 `common/utils/`。
+- **可复用的纯算法**（base64 / md5 / sha / aes / json / JSON 树 / url / 时间戳 / 日期 / 颜色 / diff / 文本批处理 / 命名风格 / CSV / JWT / 进制转换 / IP 子网 / 复制 / 下载 / 主题 / Service Worker 更新检测等）一律进 `common/utils/`。
 - **页面专属逻辑**（密码生成、Canvas 图片转换、terser worker 封装、页面状态编排）放页面自身 `scripts/` 与 `components/`。
 - **禁止复制粘贴公共函数**到页面目录；需要就用 `import` 引用。
 - 页面文件夹结构约定统一（index.vue + components/ + styles/ + scripts/），某页不涉及某类时允许省略该子目录，但约定不变。

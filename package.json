@@ -1,6 +1,6 @@
 {
   "name": "pocketbox",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "private": true,
   "type": "module",
   "description": "口袋工具箱 PocketBox - 纯前端网页工具站（密码/图片/Base64/MD5/JS压缩等，全部本地计算）",
