@@ -86,9 +86,10 @@ src/
 
 ## 9. 代码检查与格式
 
-- **ESLint**（`eslint.config.js`，扁平配置）+ **Prettier**（`.prettierrc`），配置文件与忽略规则已就绪。
-- 常用命令：`pnpm lint`（检查）、`pnpm lint:fix`（自动修复）、`pnpm format`（格式化）、`pnpm format:check`（只检查）。
-- **提交前请本地保证 `pnpm lint` 与 `pnpm format:check` 均为零问题**，再执行 `pnpm build` 确认可构建。项目自托管（开发机 Docker + 宿主机 nginx 反代），没有云端 CI，这三步就是发布前的全部门禁。
+- **ESLint**（`eslint.config.js`，扁平配置）+ **Prettier**（`.prettierrc`）+ **Vitest**（`tests/`），配置文件与忽略规则已就绪。
+- 常用命令：`pnpm lint`（检查）、`pnpm lint:fix`（自动修复）、`pnpm format`（格式化）、`pnpm format:check`（只检查）、`pnpm test`（跑一遍单元测试）、`pnpm test:watch`（监听模式）。
+- **提交前请本地保证 `pnpm format:check`、`pnpm lint`、`pnpm test` 均为零问题**，再执行 `pnpm build` 确认可构建。项目自托管（Docker + nginx 反代），没有云端 CI，这四步就是发布前的全部门禁。
+- 只有 lint + 格式 + 构建**发现不了算错**：纯函数（`common/utils/` 与页面 `scripts/` 下的算法）新增或改动时必须同步补 `tests/` 用例，尤其是边界与已知缺陷的回归哨兵。
 - 规则保持克制：只做错误预防与 Vue 基础检查，风格统一交给 Prettier（无分号 / 单引号 / 100 列 / 2 空格）。
 - 确需绕过某条规则时，用行内 `eslint-disable` **并写明原因**，禁止无注释地全局关闭规则。
 - 换行统一 LF（见 `.gitattributes`）。

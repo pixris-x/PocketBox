@@ -80,8 +80,10 @@ export function diffText(leftText, rightText, options = {}) {
   const push = (type, left, right) => {
     rows.push({
       type,
-      leftNum: left ? ++leftNum : null,
-      rightNum: right ? ++rightNum : null,
+      // 用 null 判断该侧是否有行：空字符串是合法内容（空行），
+      // 早前写成 `left ? ...` 会让空行既拿不到行号、又打乱后续行的编号
+      leftNum: left === null ? null : ++leftNum,
+      rightNum: right === null ? null : ++rightNum,
       leftText: left ?? '',
       rightText: right ?? '',
     })

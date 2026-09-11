@@ -13,11 +13,13 @@ export function hashText(text) {
 
 /**
  * ArrayBuffer → MD5 hex
+ * 注意：不要用 md5.arrayBuffer()，它返回的是原始摘要字节（ArrayBuffer），
+ * 不是十六进制字符串，会被页面渲染成「[object ArrayBuffer]」。
  * @param {ArrayBuffer} buffer
  * @returns {string}
  */
 export function hashBuffer(buffer) {
-  return md5.arrayBuffer(buffer)
+  return md5.hex(buffer)
 }
 
 /**

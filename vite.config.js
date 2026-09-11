@@ -71,6 +71,12 @@ export default defineConfig({
   // History 路由需要绝对 base，否则子路径下资源引用会错
   base: '/',
   plugins: [vue(), serviceWorkerVersion()],
+  // Vitest 配置（与构建共用 @ 别名与插件解析）
+  test: {
+    // 单元测试只覆盖纯函数，用 node 环境，不需要 DOM
+    environment: 'node',
+    include: ['tests/**/*.spec.js'],
+  },
   build: {
     rollupOptions: {
       onwarn(warning, warn) {

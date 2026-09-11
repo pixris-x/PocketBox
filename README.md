@@ -47,6 +47,7 @@ pnpm build       # 构建到 dist/
 pnpm preview     # 预览构建产物
 pnpm lint        # ESLint 检查（pnpm lint:fix 自动修复）
 pnpm format      # Prettier 格式化（pnpm format:check 只检查）
+pnpm test        # 单元测试（pnpm test:watch 监听模式）
 ```
 
 ## 目录结构
@@ -75,6 +76,7 @@ pocketBox/
 │  └─ nginx.conf               #   宿主机 nginx 反向代理配置示例
 ├─ public/                     # 静态资产（favicon / apple-touch-icon / logo.svg /
 │                              #   manifest.webmanifest / sw.js / PWA 图标）
+├─ tests/                      # 单元测试（utils/ 公共纯函数、tools/ 页面私有算法）
 ├─ Dockerfile                  # 两阶段构建，运行阶段只含 dist + server.js
 └─ docker-compose.yml          # 映射 8701:3000
 ```
@@ -85,6 +87,21 @@ pocketBox/
 2. 在 `src/data/tools.js` 添加一条元数据（id / 标题 / 描述 / 图标 / 路由 / `category` / `tags`）。
    首页网格、分类筛选与路由自动生成，无需改动其他文件。
    `category` 必须取自同文件导出的 `categories`；`tags` 同时用于卡片角标与首页搜索匹配。
+
+## 测试
+
+`tests/` 下用 Vitest 覆盖纯函数，跑 `pnpm test` 即可；共用 `vite.config.js` 里的别名与插件解析，
+因此可以直接 `import { xxx } from '@/common/utils/text'`，无需额外配置。
+
+```
+tests/
+├─ utils/          # 公共纯函数，按模块一一对应
+└─ tools/          # 页面私有算法（如单位换算的数据表 scripts/units.js）
+```
+
+只测纯函数，用 `node` 环境（不引入 jsdom）。UI 交互与视觉仍需人工验证。
+新增或修改纯函数时同步补用例，重点是**边界值**与**已知缺陷的回归哨兵**——
+`lint` / `format:check` / `build` 都发现不了「算错了」。
 
 ## 主题
 
@@ -222,6 +239,7 @@ v1 为纯前端、无任何请求外发。如需后端 / 数据持久化（例�
 | eslint-plugin-vue | ^10  | Vue 单文件组件检查                      |
 | globals           | ^17  | 环境全局变量（browser / node / worker） |
 | prettier          | ^3   | 代码格式化（`.prettierrc`）             |
+| vitest            | ^5   | 单元测试（`tests/`，纯函数断言）        |
 
 ## 许可
 
