@@ -1,0 +1,16 @@
+# ============================================================
+# 本地构建产物与 IDE 目录一律不进镜像。
+#
+# ⚠ 必须带 **/ 前缀！
+#    Docker 的 .dockerignore 里裸写 `obj/` 只匹配「上下文根目录下」的 obj，
+#    而本项目的产物在 PocketBox.Api/obj —— 一旦漏掉，宿主机生成的
+#    project.assets.json 会被 COPY . . 带进 Linux 容器，其中记录的
+#    Windows NuGet 包目录（C:\Program Files (x86)\...\NuGetPackages、
+#    C:\Users\...\.nuget\packages）在容器里不存在，
+#    publish 会以 MSB4018 / ResolvePackageAssets 失败。
+#    （2026-09-15 踩过一次，就是这么报的。）
+# ============================================================
+**/bin
+**/obj
+**/.vs
+**/*.user

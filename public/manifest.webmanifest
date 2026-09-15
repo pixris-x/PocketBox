@@ -1,7 +1,7 @@
 {
   "name": "口袋工具箱 PocketBox",
   "short_name": "口袋工具箱",
-  "description": "浏览器本地计算的网页工具站，数据不外发给第三方，支持离线使用",
+  "description": "口袋工具箱：常用开发与生活小工具集合，数据不外发给第三方，支持离线使用",
   "lang": "zh-CN",
   "start_url": "/",
   "scope": "/",

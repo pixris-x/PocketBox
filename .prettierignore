@@ -8,3 +8,11 @@ pnpm-lock.yaml
 *.svg
 *.ico
 *.png
+*.xdb
+
+# .NET 构建产物与 IDE 工作目录：Prettier 没有对应 parser，
+# 扫描它们只会产生 EBUSY 报错与输出噪音（.vs 被 VS 占用时会锁文件）
+backend/bin
+backend/obj
+backend/.vs
+.vs

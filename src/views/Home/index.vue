@@ -60,7 +60,8 @@ function resetFilter() {
         <BrandLogo class="home__hero-icon" :size="60" />
         <h1 class="home__hero-title">口袋工具箱</h1>
         <p class="home__hero-desc">
-          常用开发与生活小工具集合 · 计算在浏览器本地完成，数据不外发给第三方
+          常用开发与生活小工具集合 · 计算在浏览器本地完成，数据不外发给第三方（IP
+          归属地由本站服务端查询）
         </p>
       </section>
 

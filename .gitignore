@@ -5,6 +5,12 @@ node_modules/
 dist/
 dist-ssr/
 
+# .NET 构建产物（限定在 backend/ 内，避免误伤同名目录）
+backend/**/bin/
+backend/**/obj/
+# Visual Studio 的用户级设置文件
+*.user
+
 # 本地缓存
 .vite/
 *.local
@@ -16,6 +22,7 @@ dist-ssr/
 # 编辑器 / 系统
 .DS_Store
 .idea/
+.vs/
 .vscode/*
 !.vscode/extensions.json
 Thumbs.db

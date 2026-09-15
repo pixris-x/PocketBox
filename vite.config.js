@@ -71,6 +71,13 @@ export default defineConfig({
   // History 路由需要绝对 base，否则子路径下资源引用会错
   base: '/',
   plugins: [vue(), serviceWorkerVersion()],
+  // 本地开发把 /api 转发给 backend（dotnet run 的 http profile 端口），
+  // 使 `pnpm dev` 下的接口行为与容器部署一致。仅 dev 生效，不影响构建产物。
+  server: {
+    proxy: {
+      '/api': 'http://localhost:5048',
+    },
+  },
   // Vitest 配置（与构建共用 @ 别名与插件解析）
   test: {
     // 单元测试只覆盖纯函数，用 node 环境，不需要 DOM

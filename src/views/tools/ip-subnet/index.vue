@@ -1,16 +1,12 @@
 <script setup>
 // IP 工具页：CIDR 子网计算 / IP 归属地查询 / 我的公网 IP
-// 子网计算：纯位运算，算法在 common/utils/ip-subnet.js
-// 归属地查询：离线 xdb 库，算法在 common/utils/ip-region.js，取数在 ./scripts/ip-db.js
-// 我的 IP：只请求本站同源 /api/ip，不经第三方，见 ./scripts/my-ip.js
-import { computed, onMounted, ref, shallowRef, watch } from 'vue'
+// 子网计算：纯位运算，在浏览器本地完成，算法见 common/utils/ip-subnet.js
+// 归属地与公网 IP：调用本站服务端 API（backend/PocketBox.Api），调用封装见 ./scripts/ip-api.js
+import { computed, ref } from 'vue'
 import ToolShell from '@/components/ToolShell/index.vue'
 import { copyText } from '@/common/utils/copy'
-import { formatBytes, formatNumber } from '@/common/utils/format'
 import { describeCidr, parseCidr, sameSubnet } from '@/common/utils/ip-subnet'
-import { describeRegion } from '@/common/utils/ip-region'
-import { DB_SIZE_HINT, hasCachedDb, loadRegionSearcher } from './scripts/ip-db'
-import { fetchMyIp } from './scripts/my-ip'
+import { fetchMyIp, lookupRegion } from './scripts/ip-api'
 
 const messageOf = (err) => (err instanceof Error ? err.message : String(err))
 
@@ -20,6 +16,13 @@ const TABS = [
   { label: '我的 IP', value: 'mine' },
 ]
 const activeTab = ref('subnet')
+
+/** 归属地单行描述；保留地址给专门文案 */
+function describeRegion(entry) {
+  if (!entry?.found) return '未收录'
+  if (entry.isReserved) return '保留地址（未分配为公网）'
+  return [entry.country, entry.province, entry.city, entry.isp].filter(Boolean).join(' ')
+}
 
 // ---------- 子网计算 ----------
 const input = ref('192.168.1.0/24')
@@ -63,69 +66,31 @@ const ROWS = computed(() => {
   ]
 })
 
-// ---------- IP 归属地（离线库） ----------
+// ---------- IP 归属地 ----------
 const regionInput = ref('')
-const searcher = shallowRef(null)
-const dbPhase = ref('idle')
-const dbStage = ref('')
-const dbLoaded = ref(0)
-const dbTotal = ref(0)
-const dbError = ref('')
-const dbCached = ref(false)
+const regionEntry = ref(null)
+const regionPhase = ref('idle')
+const regionError = ref('')
 
-const dbProgress = computed(() => (dbTotal.value ? dbLoaded.value / dbTotal.value : 0))
-
-const STAGE_TEXT = {
-  checking: '正在检查本地缓存',
-  downloading: '正在下载离线库',
-  parsing: '正在解析索引',
-  caching: '正在写入本地缓存',
-}
-const dbStatusText = computed(() => STAGE_TEXT[dbStage.value] || '准备中')
-
-async function ensureDb() {
-  if (searcher.value || dbPhase.value === 'loading') return
-  dbPhase.value = 'loading'
-  dbError.value = ''
-  try {
-    searcher.value = await loadRegionSearcher((status) => {
-      dbStage.value = status.phase
-      if (status.phase === 'downloading') {
-        dbLoaded.value = status.loaded || 0
-        dbTotal.value = status.total || 0
-      }
-    })
-    dbPhase.value = 'ready'
-    dbCached.value = true
-  } catch (err) {
-    dbPhase.value = 'error'
-    dbError.value = messageOf(err)
-  }
-}
-
-/** 切进归属地页签才取数据：不想下 11MB 的用户不会被动消耗流量 */
-watch(activeTab, (tab) => {
-  if (tab === 'region') ensureDb()
-})
-
-onMounted(async () => {
-  dbCached.value = await hasCachedDb()
-})
-
-const regionResult = computed(() => {
+async function queryRegion() {
   const text = regionInput.value.trim()
-  if (!text || !searcher.value) return null
+  if (!text || regionPhase.value === 'loading') return
+
+  regionPhase.value = 'loading'
+  regionError.value = ''
+  regionEntry.value = null
   try {
-    return { ok: true, entry: searcher.value.search(text) }
+    regionEntry.value = await lookupRegion(text)
+    regionPhase.value = 'ready'
   } catch (err) {
-    return { ok: false, error: messageOf(err) }
+    regionPhase.value = 'error'
+    regionError.value = messageOf(err)
   }
-})
+}
 
 const REGION_ROWS = computed(() => {
-  const r = regionResult.value
-  if (!r?.ok || !r.entry.found) return []
-  const e = r.entry
+  const e = regionEntry.value
+  if (!e?.found) return []
   return [
     { label: '归属地', value: describeRegion(e), copy: true },
     { label: '国家 / 地区', value: e.country || '—', copy: false },
@@ -133,7 +98,6 @@ const REGION_ROWS = computed(() => {
     { label: '城市', value: e.city || '—', copy: false },
     { label: '运营商', value: e.isp || '—', copy: false },
     { label: '国家代码', value: e.isoCode || '—', copy: false },
-    { label: '所属网段', value: `${e.segment.start} ~ ${e.segment.end}`, copy: true },
   ]
 })
 
@@ -141,13 +105,20 @@ const REGION_ROWS = computed(() => {
 const myIp = ref('')
 const myIpPhase = ref('idle')
 const myIpError = ref('')
+const myRegion = ref(null)
+const myRegionPhase = ref('idle')
+const myRegionError = ref('')
 
 async function queryMyIp() {
   myIpPhase.value = 'loading'
   myIpError.value = ''
+  myRegion.value = null
+  myRegionPhase.value = 'idle'
   try {
     myIp.value = await fetchMyIp()
     myIpPhase.value = 'ready'
+    // 归属地是附加信息，单独加载，不拖慢 IP 本身的展示
+    queryMyRegion()
   } catch (err) {
     myIp.value = ''
     myIpPhase.value = 'error'
@@ -155,24 +126,41 @@ async function queryMyIp() {
   }
 }
 
+async function queryMyRegion() {
+  if (!myIp.value) return
+  if (myIpIsV6.value) {
+    // 离线库只收录 IPv4，不必白跑一次请求换回一个必然的 400
+    myRegionPhase.value = 'unsupported'
+    return
+  }
+
+  myRegionPhase.value = 'loading'
+  myRegionError.value = ''
+  try {
+    myRegion.value = await lookupRegion(myIp.value)
+    myRegionPhase.value = 'ready'
+  } catch (err) {
+    myRegionPhase.value = 'error'
+    myRegionError.value = messageOf(err)
+  }
+}
+
 const myIpIsV6 = computed(() => myIp.value.includes(':'))
 
-/** 离线库已加载时顺手带出归属地，没加载就不为这一点需求去下 11MB */
-const myIpRegion = computed(() => {
-  if (!myIp.value || myIpIsV6.value || !searcher.value) return null
-  try {
-    const entry = searcher.value.search(myIp.value)
-    return entry.found ? entry : null
-  } catch {
-    return null
-  }
+const REGION_ROWS_FOR_MY_IP = computed(() => {
+  const e = myRegion.value
+  if (!e?.found) return []
+  return [
+    { label: '归属地', value: describeRegion(e), copy: true },
+    { label: '运营商', value: e.isp || '—', copy: false },
+  ]
 })
 </script>
 
 <template>
   <ToolShell
     title="IP 工具"
-    description="CIDR 子网计算、IP 归属地查询与公网 IP 探测。归属地走本地离线库，查询不出浏览器；公网 IP 仅由本站同源端点回报。"
+    description="CIDR 子网计算、IP 归属地查询与公网 IP 探测。子网计算在浏览器本地完成；归属地与公网 IP 由本站服务端提供，不经任何第三方。"
   >
     <div class="ip-tabs">
       <UiTabs v-model="activeTab" :tabs="TABS" />
@@ -251,51 +239,34 @@ const myIpRegion = computed(() => {
     <template v-else-if="activeTab === 'region'">
       <UiCard>
         <UiSection title="查询 IP 归属地">
-          <UiInput v-model="regionInput" placeholder="例如 114.114.114.114" />
-
-          <div v-if="dbPhase === 'loading'" class="ip-db">
-            <div class="ip-db__track">
-              <span class="ip-db__bar" :style="{ width: `${dbProgress * 100}%` }" />
-            </div>
-            <p class="ip-db__text">
-              {{ dbStatusText }}
-              <template v-if="dbStage === 'downloading' && dbTotal">
-                · {{ formatBytes(dbLoaded) }} / {{ formatBytes(dbTotal) }}
-              </template>
-            </p>
-            <p v-if="dbStage === 'downloading'" class="ip-hint">
-              离线库 {{ DB_SIZE_HINT }}，仅首次需要下载，之后走本地缓存、断网也能查。
-            </p>
+          <UiInput
+            v-model="regionInput"
+            placeholder="例如 114.114.114.114"
+            @keyup.enter="queryRegion"
+          />
+          <div class="ip-actions">
+            <UiButton
+              :disabled="regionPhase === 'loading' || !regionInput.trim()"
+              @click="queryRegion"
+            >
+              <UiIcon name="search" :size="15" />
+              {{ regionPhase === 'loading' ? '查询中…' : '查询归属地' }}
+            </UiButton>
           </div>
-
-          <template v-else-if="dbPhase === 'error'">
-            <p class="ip-error">
-              <UiIcon name="alert-circle" :size="14" />
-              {{ dbError }}
-            </p>
-            <UiButton variant="secondary" size="sm" @click="ensureDb">重试</UiButton>
-          </template>
-
-          <p v-else-if="dbPhase === 'ready'" class="ip-hint">
-            离线库已就绪，共
-            {{ formatNumber(searcher.segmentCount) }} 个网段；查询全程在本机完成，不发任何请求。
-          </p>
-          <p v-else class="ip-hint">
-            首次使用需下载离线库（{{ DB_SIZE_HINT }}），下载后持久缓存、断网也能查。
-          </p>
+          <p class="ip-hint">输入 IP 后回车或点查询。IPv4 精确到城市，境外多数只到国家。</p>
         </UiSection>
       </UiCard>
 
-      <UiCard v-if="regionResult && !regionResult.ok">
+      <UiCard v-if="regionPhase === 'error'">
         <UiSection title="查询失败">
           <p class="ip-error">
             <UiIcon name="alert-circle" :size="14" />
-            {{ regionResult.error }}
+            {{ regionError }}
           </p>
         </UiSection>
       </UiCard>
 
-      <UiCard v-else-if="regionResult?.ok && regionResult.entry.found">
+      <UiCard v-else-if="regionEntry?.found">
         <UiSection title="归属地信息">
           <ul class="ip-list">
             <li v-for="row in REGION_ROWS" :key="row.label" class="ip-row">
@@ -312,9 +283,15 @@ const myIpRegion = computed(() => {
               </UiButton>
             </li>
           </ul>
-          <p v-if="regionResult.entry.isReserved" class="ip-hint">
+          <p v-if="regionEntry.isReserved" class="ip-hint">
             该地址属于保留段，不对应具体地理位置。
           </p>
+        </UiSection>
+      </UiCard>
+
+      <UiCard v-else-if="regionEntry">
+        <UiSection title="未收录">
+          <p class="ip-hint">归属地库中没有 {{ regionEntry.ip }} 的记录。</p>
         </UiSection>
       </UiCard>
 
@@ -322,7 +299,7 @@ const myIpRegion = computed(() => {
         <UiIcon name="info" :size="16" />
         <p>
           数据来自 ip2region 离线库（Apache-2.0 /
-          MIT），国内精确到城市，境外多数只到国家。库随版本更新， 数据有滞后属正常。
+          MIT），内置于本站服务端。库随版本更新，数据有滞后属正常。
         </p>
       </UiCard>
     </template>
@@ -354,46 +331,44 @@ const myIpRegion = computed(() => {
           </div>
 
           <p v-else class="ip-hint">
-            由本站同源端点 /api/ip 回报，不经过任何第三方服务，你的 IP 不会落到别人手里。
+            由本站服务端读取连接来源后回报，不经过任何第三方，你的 IP 不会落到别人手里。
           </p>
         </UiSection>
       </UiCard>
 
       <UiCard v-if="myIp">
         <UiSection title="归属地">
-          <p v-if="myIpIsV6" class="ip-hint">
-            当前是 IPv6 地址，离线库只收录 IPv4，可复制后另行查询。
+          <p v-if="myRegionPhase === 'unsupported'" class="ip-hint">
+            当前是 IPv6 地址，归属地库只收录 IPv4，可复制后另行查询。
           </p>
-          <ul v-else-if="myIpRegion" class="ip-list">
-            <li class="ip-row">
-              <span class="ip-row__label">归属地</span>
-              <span class="ip-row__value">{{ describeRegion(myIpRegion) }}</span>
-            </li>
-            <li class="ip-row">
-              <span class="ip-row__label">所属网段</span>
-              <span class="ip-row__value">
-                {{ myIpRegion.segment.start }} ~ {{ myIpRegion.segment.end }}
-              </span>
+          <p v-else-if="myRegionPhase === 'error'" class="ip-error">
+            <UiIcon name="alert-circle" :size="14" />
+            {{ myRegionError }}
+          </p>
+          <p v-else-if="myRegionPhase === 'loading'" class="ip-hint">正在查询归属地…</p>
+          <ul v-else-if="myRegion?.found" class="ip-list">
+            <li v-for="row in REGION_ROWS_FOR_MY_IP" :key="row.label" class="ip-row">
+              <span class="ip-row__label">{{ row.label }}</span>
+              <span class="ip-row__value">{{ row.value }}</span>
+              <UiButton
+                v-if="row.copy"
+                variant="secondary"
+                size="sm"
+                @click="copyText(row.value, { successMsg: '已复制' })"
+              >
+                <UiIcon name="copy" :size="14" />
+                复制
+              </UiButton>
             </li>
           </ul>
-          <template v-else>
-            <p class="ip-hint">归属地是本地离线查询，需要先取下离线库。</p>
-            <UiButton
-              variant="secondary"
-              size="sm"
-              :disabled="dbPhase === 'loading'"
-              @click="ensureDb"
-            >
-              加载离线库（{{ DB_SIZE_HINT }}）
-            </UiButton>
-          </template>
+          <p v-else class="ip-hint">归属地库中没有该地址的记录。</p>
         </UiSection>
       </UiCard>
 
       <UiCard class="ip-tip">
         <UiIcon name="info" :size="16" />
         <p>
-          出口 IP 由服务端从连接或反代头（X-Real-IP /
+          出口 IP 由服务端从连接或反向代理头（X-Real-IP /
           X-Forwarded-For）读取，仅用于这一次响应，不写日志。
         </p>
       </UiCard>

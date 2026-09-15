@@ -5,9 +5,10 @@
 
 ## 1. 技术栈锁定
 
-- 前端框架：**Vite + Vue 3 + vue-router**（v1 前端纯静态；部署层仅有一个 `GET /api/ip`，见 §7）。
-- 包管理器：**只用 pnpm**，不得使用 npm / yarn，也不得混用。
-- 语言：**只用 JavaScript（ESM）+ SCSS（dart-sass）**。**禁止引入 TypeScript**（不得添加 .ts/.tsx 文件或 ts 相关依赖）。
+- 前端框架：**Vite + Vue 3 + vue-router**，纯静态产物（SPA fallback 由 `deploy/server.js` 提供）。
+- 后端：**.NET 10 Minimal API**（`backend/`），当前承载 IP 相关接口，约定见 §7。
+- 包管理器：前端**只用 pnpm**，不得使用 npm / yarn，也不得混用；后端统一用 `dotnet` CLI。
+- 语言：前端**只用 JavaScript（ESM）+ SCSS（dart-sass）**，**禁止引入 TypeScript**（不得添加 .ts/.tsx 文件或 ts 相关依赖）；后端用 C#。
 - 新增第三方依赖需评估必要性，并在 `README.md` 的「依赖登记」中记录（名称 / 版本 / 用途）。
 - 构建配置：`base: '/'` + History 路由（URL 无 `#`）。**部署时服务端必须配置 SPA fallback**（未知路径回退到 `index.html`），否则子路由刷新会 404。
 
@@ -31,13 +32,25 @@ src/
          ├─ index.vue      # 主 vue
          ├─ components/    # 页面私有组件
          ├─ styles/        # 页面私有样式
-         └─ scripts/       # 页面私有脚本（逻辑/worker）
+         └─ scripts/       # 页面私有脚本（逻辑/worker/接口调用封装）
+```
+
+```
+backend/                 # ★ .NET 10 后端（只放需要服务端才能做的事）
+├─ PocketBox.slnx        #   解决方案（.NET 10 的新 XML 格式，不是 .sln）
+├─ data/                 #   离线数据（ip2region_v4.xdb 与随附 LICENSE）
+└─ PocketBox.Api/
+   ├─ Program.cs         #   组合根：只做 DI 注册与服务装配
+   ├─ Endpoints/         #   端点定义（按资源分组，扩展方法挂到 IEndpointRouteBuilder）
+   ├─ Services/          #   领域逻辑
+   └─ Contracts/         #   请求 / 响应模型
 ```
 
 ### 2.1 归属原则（重要）
 
-- **可复用的纯算法**（base64 / md5 / sha / aes / json / JSON 树 / url / 时间戳 / 日期 / 颜色 / diff / 文本批处理 / 命名风格 / CSV / JWT / 进制转换 / IP 子网 / IP 归属地 / 复制 / 下载 / 主题 / Service Worker 更新检测等）一律进 `common/utils/`。
-- **页面专属逻辑**（密码生成、Canvas 图片转换、terser worker 封装、离线大文件的下载与缓存、页面状态编排）放页面自身 `scripts/` 与 `components/`。
+- **可复用的纯算法**（base64 / md5 / sha / aes / json / JSON 树 / url / 时间戳 / 日期 / 颜色 / diff / 文本批处理 / 命名风格 / CSV / JWT / 进制转换 / IP 子网 / 复制 / 下载 / 主题 / Service Worker 更新检测等）一律进 `common/utils/`。
+- **页面专属逻辑**（密码生成、Canvas 图片转换、terser worker 封装、页面状态编排、接口调用封装）放页面自身 `scripts/` 与 `components/`。
+- **需要服务端才能做或需要联网的能力**（IP 归属地查询、访客 IP 探测）放 `backend/`；页面里的调用必须封装进 `scripts/` 模块，不要在组件中散写 `fetch`。
 - **禁止复制粘贴公共函数**到页面目录；需要就用 `import` 引用。
 - 页面文件夹结构约定统一（index.vue + components/ + styles/ + scripts/），某页不涉及某类时允许省略该子目录，但约定不变。
 
@@ -72,16 +85,34 @@ src/
 - 新增配色：在 `_base.scss` 追加 `[data-theme='light'][data-accent='<id>']` 与 `[data-theme='dark'][data-accent='<id>']` 两组强调色变量，并在 `theme.js` 的 `ACCENTS` 中登记。
 - **禁止在组件中硬编码颜色值**，一律引用设计 token。
 
-## 7. 未来后端
+## 7. 后端约定
 
-- 如后续引入后端 / 数据持久化，技术选型为 **.NET 10 + PostgreSQL**。
-- 新增 `src/api/` 服务层，通过 fetch 调用后端接口；前端目录结构不变。
-- v1 阶段无后端；工具计算全部在浏览器本地完成（隐私友好）。
-- **唯一例外**：部署层的 `GET /api/ip`（`deploy/server.js`）回报访问者出口 IP，供「IP 工具 → 我的 IP」使用。
-  它读反代头 `X-Real-IP` / `X-Forwarded-For`，不写日志、不做持久化，响应带 `Cache-Control: no-store`；
-  对应的前端调用集中在 `src/views/tools/ip-subnet/scripts/my-ip.js`。
-- **新增任何其他外发请求前，必须先回头修改本节**，并同步首页 / 页脚 / `index.html` / `manifest.webmanifest`
-  上的隐私表述，避免宣传口径与实际行为冲突。
+项目已引入后端（.NET 10 Minimal API，`backend/`），用来承载「必须服务端才能做」的能力：
+
+- **技术栈**：.NET 10 + Minimal API。**数据持久化尚未引入**，将来需要时选型为 PostgreSQL。
+- **目录职责**：`Endpoints/` 只做参数绑定与响应编排，`Services/` 放领域逻辑，`Contracts/` 放请求 / 响应模型。
+  `Program.cs` 只做 DI 注册与服务装配，不要把业务逻辑写进去。
+- **端点命名**：统一挂在 `/api/` 下，按资源分组（如 `/api/ip`、`/api/ip/region`）。
+- **配置**：路径、开关走 `appsettings.json`，但必须都有可用的默认值，保证 `dotnet run` 零配置能起来。
+- **前端调用**：统一封装在对应页面的 `scripts/` 模块中，组件里不直接写 `fetch`。
+  （调用点目前只有一个端点族，暂不抽 `src/api/` 层；等业务接口变多再抽。）
+- **调试**：`Development` 环境启用 Swagger UI（入口 `/swagger`，文档 `/openapi/v1.json`），
+  新增端点会自动出现在文档里，无需额外维护。**生产环境必须保持关闭**（`app.Environment.IsDevelopment()` 守卫），
+  线上是公网服务，不对外公开接口文档。
+- **部署**：`docker-compose.yml` 有 `web`（静态）、`api`（.NET）、`nginx`（统一入口）三个服务；
+  nginx 把 `/api/` 整段转发给 api，静态容器不再处理任何接口。
+  ⚠ **两份 nginx 配置不能混用**：`deploy/nginx.conf` 给**宿主机 nginx**（upstream 写 `127.0.0.1:映射端口`），
+  `deploy/nginx.docker.conf` 给 **compose 内的 nginx 容器**（upstream 写服务名 `web` / `api`）。
+  改分流规则时**两份都要同步改**。
+
+### 7.1 隐私口径（重要）
+
+- 工具的**计算**在浏览器本地完成，**数据不外发给第三方**。这是站点的核心卖点，任何改动都不得削弱它。
+- 当前唯一经由服务端的能力是 IP 相关接口（归属地查询、访客 IP 探测），走的是**本站自己的服务**，不经过第三方。
+  因此站内文案统一为「计算在浏览器本地完成，数据不外发给第三方（IP 归属地由本站服务端查询）」。
+- **新增任何其他外发请求或服务端能力前，必须先回头修改本节**，并同步 `Home/index.vue`、`AppFooter/index.vue`、
+  `index.html`（meta description）、`public/manifest.webmanifest`、`README.md` 的隐私表述，
+  避免宣传口径与实际行为冲突。
 
 ## 8. 代码风格
 
@@ -97,4 +128,9 @@ src/
 - 只有 lint + 格式 + 构建**发现不了算错**：纯函数（`common/utils/` 与页面 `scripts/` 下的算法）新增或改动时必须同步补 `tests/` 用例，尤其是边界与已知缺陷的回归哨兵。
 - 规则保持克制：只做错误预防与 Vue 基础检查，风格统一交给 Prettier（无分号 / 单引号 / 100 列 / 2 空格）。
 - 确需绕过某条规则时，用行内 `eslint-disable` **并写明原因**，禁止无注释地全局关闭规则。
-- 换行统一 LF（见 `.gitattributes`）。
+- **后端**：`dotnet build backend/PocketBox.slnx` 编译，`dotnet run --project backend/PocketBox.Api` 本地起服务。
+  提交前同样要保证**编译零警告零错误**。
+- **换行**（见 `.gitattributes`）：
+  - **CRLF**：`.cs` / `.csproj` / `.slnx` / `.sln` / `.props` / `.targets`
+  - **LF**：其余全部，**包括 `backend/` 下的 `.json`** —— Prettier 默认 `endOfLine: lf`
+    且会检查这些 JSON，写成 CRLF 会让 `pnpm format:check` 失败。后端目录混用两种约定，新增文件时注意。

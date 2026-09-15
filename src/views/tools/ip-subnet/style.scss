@@ -122,31 +122,12 @@
   overflow-x: auto;
 }
 
-// 离线库下载进度
-.ip-db {
+// 输入框下方的操作行
+.ip-actions {
+  display: flex;
+  gap: var(--space-3);
   margin-top: var(--space-3);
-
-  &__track {
-    height: 6px;
-    border-radius: 3px;
-    background: var(--color-surface-2);
-    border: 1px solid var(--color-border);
-    overflow: hidden;
-  }
-
-  &__bar {
-    display: block;
-    height: 100%;
-    background: var(--color-primary);
-    transition: width 0.2s ease;
-  }
-
-  &__text {
-    margin-top: var(--space-2);
-    font-size: var(--font-sm);
-    color: var(--color-text-muted);
-    font-variant-numeric: tabular-nums;
-  }
+  flex-wrap: wrap;
 }
 
 // 出错后紧跟的重试按钮

@@ -1,0 +1,47 @@
+@host = http://localhost:5048
+
+### 我的公网 IP
+GET {{host}}/api/ip
+Accept: application/json
+
+###
+
+### 我的公网 IP + 归属地（省略 ip 参数即查请求者自己）
+GET {{host}}/api/ip/region
+Accept: application/json
+
+###
+
+### 国内地址：中国 江苏省 南京市 CN
+GET {{host}}/api/ip/region?ip=114.114.114.114
+Accept: application/json
+
+###
+
+### 境外地址：United States California Google LLC US
+GET {{host}}/api/ip/region?ip=8.8.8.8
+Accept: application/json
+
+###
+
+### 保留地址：Reserved
+GET {{host}}/api/ip/region?ip=192.168.1.1
+Accept: application/json
+
+###
+
+### 库边界：末段 255.255.255.0/24 也应命中（Reserved）
+GET {{host}}/api/ip/region?ip=255.255.255.255
+Accept: application/json
+
+###
+
+### 预期 400：IPv6 不在离线库收录范围
+GET {{host}}/api/ip/region?ip=2001:db8::1
+Accept: application/json
+
+###
+
+### 预期 400：非法地址
+GET {{host}}/api/ip/region?ip=abc
+Accept: application/json

@@ -1,6 +1,7 @@
 // ============================================================
 // 口袋工具箱 PocketBox — 容器内静态文件服务器（零依赖）
 // 职责：托管 dist/ + History 路由 SPA fallback
+// 注意：/api/ 由 nginx 直接转给 .NET API 容器，不经过本服务，所以这里没有任何接口逻辑
 // gzip / 强缓存 / 安全头等由宿主机 nginx 反向代理层负责
 // ============================================================
 import http from 'node:http'
@@ -41,22 +42,6 @@ function send(res, status, body, headers = {}) {
   res.end(body)
 }
 
-/** 取访问者公网 IP：优先用反代传来的真实地址（见 deploy/nginx.conf），直连时回落 socket */
-function clientIp(req) {
-  const candidates = [
-    req.headers['x-real-ip'],
-    String(req.headers['x-forwarded-for'] || '').split(',')[0],
-    req.socket.remoteAddress,
-  ]
-  for (const raw of candidates) {
-    const value = String(raw || '').trim()
-    if (!value) continue
-    // IPv6-mapped IPv4（::ffff:1.2.3.4）还原成 IPv4，前端可直接拿去查离线归属地
-    return value.startsWith('::ffff:') ? value.slice(7) : value
-  }
-  return ''
-}
-
 const server = http.createServer((req, res) => {
   if (req.method !== 'GET' && req.method !== 'HEAD') {
     return send(res, 405, 'Method Not Allowed', { Allow: 'GET, HEAD' })
@@ -69,16 +54,6 @@ const server = http.createServer((req, res) => {
   } catch {
     return send(res, 400, 'Bad Request')
   }
-  // 同源端点：回报访问者自己的公网 IP，供前端「我的公网 IP」使用。
-  // 不落日志、不落盘，IP 只出现在这一次响应里
-  if (urlPath === '/api/ip') {
-    return send(res, 200, JSON.stringify({ ip: clientIp(req) }), {
-      'Content-Type': 'application/json; charset=utf-8',
-      // 出口 IP 随时可能变，禁止任何一层缓存（包括 Service Worker）
-      'Cache-Control': 'no-store, must-revalidate',
-    })
-  }
-
   const filePath = path.normalize(path.join(DIST, urlPath))
   if (!filePath.startsWith(DIST + path.sep) && filePath !== DIST) {
     return send(res, 403, 'Forbidden')
@@ -99,7 +74,7 @@ const server = http.createServer((req, res) => {
           'Cache-Control': cacheControl,
         }
 
-        // 协商缓存：11MB 的离线 IP 库靠它把重复访问压成一次 304。
+        // 协商缓存：图标 / manifest 这类不带内容 hash 的文件靠它把重复访问压成一次 304。
         // 命中目录索引时 target 已是 index.html，但 stat 仍属原目录、mtime 不可信，故跳过
         if (!isHashedAsset && target === filePath) {
           const etag = `W/"${data.length.toString(16)}-${Math.trunc(stat.mtimeMs).toString(16)}"`
