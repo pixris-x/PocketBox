@@ -101,7 +101,7 @@ pocketBox/
 │                              #   manifest.webmanifest / sw.js / PWA 图标）
 ├─ tests/                      # 单元测试（utils/ 公共纯函数、tools/ 页面私有算法）
 ├─ Dockerfile                  # 前端两阶段构建，运行阶段只含 dist + server.js
-└─ docker-compose.yml          # web（8701:3000）+ api（8702:8080）+ nginx（8080:80）
+└─ docker-compose.yml          # web（8701:3000）+ api（8702:8080）+ nginx（8080:80，仅 local profile）
 ```
 
 ## 新增一个工具
@@ -206,11 +206,15 @@ VS 与 `dotnet run` 默认就是开发环境，`launchSettings.json` 已把启�
 `docker-compose.yml` 里的 `nginx` 服务就是为这个场景准备的：它和 `web`、`api` 在同一个 compose 网络内，
 把 `/api/` 转给 api 服务、其余转给静态服务，完整复刻生产链路。
 
+它挂在 **`local` profile** 下，所以默认的 `docker compose up -d` 不会启动它，必须显式带上 profile：
+
 ```bash
-docker compose up -d --build
+docker compose --profile local up -d --build
 # 然后打开 http://localhost:8080/ ，就是完整站点（含 IP 归属地）
 ```
 
+- **线上不需要它** —— 线上已有宿主机 nginx 负责 TLS 与 `/api/` 分流，再起一个容器版只会白拉镜像、
+  白占 8080。所以给它加了 `profiles: ['local']`，线上直接 `docker compose up -d` 时会自动跳过。
 - 入口用 **8080** 而不是 80：宿主机 80 常被 Windows 的 HTTP.sys 占用。改 `docker-compose.yml` 里
   `'8080:80'` 左侧数字即可换端口。
 - 它挂载的是 **`deploy/nginx.docker.conf`** —— upstream 写的是 compose 服务名（`web` / `api`）；
@@ -221,7 +225,7 @@ docker compose up -d --build
 ### 步骤
 
 ```bash
-docker compose up -d --build   # 构建并后台启动两个容器
+docker compose up -d --build   # 构建并后台启动 web + api（nginx 属 local profile，不会被启动）
 docker compose logs -f         # 查看日志（加服务名可只看一个：logs -f api）
 docker compose down            # 停止并移除容器
 ```

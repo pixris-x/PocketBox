@@ -101,6 +101,8 @@ backend/                 # ★ .NET 10 后端（只放需要服务端才能做�
   线上是公网服务，不对外公开接口文档。
 - **部署**：`docker-compose.yml` 有 `web`（静态）、`api`（.NET）、`nginx`（统一入口）三个服务；
   nginx 把 `/api/` 整段转发给 api，静态容器不再处理任何接口。
+  ⚠ **`nginx` 服务挂在 `profiles: ['local']` 下，仅用于本机验证**（`docker compose --profile local up -d`）：
+  线上已有宿主机 nginx 负责 TLS 与分流，默认的 `docker compose up -d` 必须**不**启动它，否则会白拉镜像并占用 8080。
   ⚠ **两份 nginx 配置不能混用**：`deploy/nginx.conf` 给**宿主机 nginx**（upstream 写 `127.0.0.1:映射端口`），
   `deploy/nginx.docker.conf` 给 **compose 内的 nginx 容器**（upstream 写服务名 `web` / `api`）。
   改分流规则时**两份都要同步改**。

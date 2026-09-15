@@ -36,7 +36,12 @@ services:
   # 统一入口：在本机复刻生产链路（nginx → 静态前端 / .NET API），宿主机无需装 nginx。
   # ⚠ 这里挂载的是 deploy/nginx.docker.conf —— 它的 upstream 写的是 compose 服务名
   #   （web / api）。给宿主机 nginx 用的 deploy/nginx.conf 写的是 127.0.0.1:映射端口，两者不能混用。
+  # ★ profiles: local —— 默认的 `docker compose up -d` 不会启动它。
+  #   本机：docker compose --profile local up -d
+  #   线上：直接 docker compose up -d 即可（线上已有宿主机 nginx 负责 TLS 与 /api 分流，
+  #         再起一个容器版只会白拉镜像、白占 8080）
   nginx:
+    profiles: ['local']
     image: nginx:alpine
     container_name: pocketbox-nginx
     restart: unless-stopped
