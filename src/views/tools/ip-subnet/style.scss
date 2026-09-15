@@ -116,3 +116,60 @@
     color: var(--color-primary);
   }
 }
+
+// 三个页签在窄屏下不换行，靠外层容器横向滚动兜住
+.ip-tabs {
+  overflow-x: auto;
+}
+
+// 离线库下载进度
+.ip-db {
+  margin-top: var(--space-3);
+
+  &__track {
+    height: 6px;
+    border-radius: 3px;
+    background: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    overflow: hidden;
+  }
+
+  &__bar {
+    display: block;
+    height: 100%;
+    background: var(--color-primary);
+    transition: width 0.2s ease;
+  }
+
+  &__text {
+    margin-top: var(--space-2);
+    font-size: var(--font-sm);
+    color: var(--color-text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+// 出错后紧跟的重试按钮
+.ip-error + .ui-button {
+  margin-top: var(--space-3);
+}
+
+// 我的公网 IP 结果
+.ip-mine {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+  padding: var(--space-3);
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+
+  &__ip {
+    flex: 1;
+    min-width: 0;
+    font-family: var(--font-mono);
+    font-size: var(--font-md);
+    word-break: break-all;
+  }
+}

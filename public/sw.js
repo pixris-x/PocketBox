@@ -11,6 +11,11 @@ const VERSION = '__SW_VERSION__'
 const SHELL_CACHE = `pocketbox-shell-${VERSION}`
 const ASSET_CACHE = `pocketbox-assets-${VERSION}`
 
+// 离线 IP 库（约 11MB）由页面按需下载并自行管理，不带版本号。
+// activate 时必须显式放过它：否则每次构建改了产物指纹都会连它一起清掉，
+// 用户每发一版就要重下 11MB。
+const KEEP_UNVERSIONED = ['pocketbox-ipdb-']
+
 // 应用外壳：离线时至少要能打开首页
 const SHELL_ASSETS = [
   '/',
@@ -40,7 +45,12 @@ self.addEventListener('activate', (event) => {
       .then((keys) =>
         Promise.all(
           keys
-            .filter((key) => key !== SHELL_CACHE && key !== ASSET_CACHE)
+            .filter(
+              (key) =>
+                key !== SHELL_CACHE &&
+                key !== ASSET_CACHE &&
+                !KEEP_UNVERSIONED.some((prefix) => key.startsWith(prefix))
+            )
             .map((key) => caches.delete(key))
         )
       )
@@ -102,6 +112,10 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(networkFirst(request, '/index.html'))
     return
   }
+
+  // /api/ 与离线 IP 库不交给 SW 管：API 响应被缓存会一直返回过期的出口 IP；
+  // 11MB 的 xdb 塞进 shell 桶会随版本号变化被反复清理重下。两者都由页面自行处理。
+  if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/ip2region/')) return
 
   if (url.pathname.startsWith('/assets/')) {
     event.respondWith(cacheFirst(request))

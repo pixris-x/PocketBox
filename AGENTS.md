@@ -5,7 +5,7 @@
 
 ## 1. 技术栈锁定
 
-- 前端框架：**Vite + Vue 3 + vue-router**（当前 v1 为纯前端，无后端）。
+- 前端框架：**Vite + Vue 3 + vue-router**（v1 前端纯静态；部署层仅有一个 `GET /api/ip`，见 §7）。
 - 包管理器：**只用 pnpm**，不得使用 npm / yarn，也不得混用。
 - 语言：**只用 JavaScript（ESM）+ SCSS（dart-sass）**。**禁止引入 TypeScript**（不得添加 .ts/.tsx 文件或 ts 相关依赖）。
 - 新增第三方依赖需评估必要性，并在 `README.md` 的「依赖登记」中记录（名称 / 版本 / 用途）。
@@ -36,8 +36,8 @@ src/
 
 ### 2.1 归属原则（重要）
 
-- **可复用的纯算法**（base64 / md5 / sha / aes / json / JSON 树 / url / 时间戳 / 日期 / 颜色 / diff / 文本批处理 / 命名风格 / CSV / JWT / 进制转换 / IP 子网 / 复制 / 下载 / 主题 / Service Worker 更新检测等）一律进 `common/utils/`。
-- **页面专属逻辑**（密码生成、Canvas 图片转换、terser worker 封装、页面状态编排）放页面自身 `scripts/` 与 `components/`。
+- **可复用的纯算法**（base64 / md5 / sha / aes / json / JSON 树 / url / 时间戳 / 日期 / 颜色 / diff / 文本批处理 / 命名风格 / CSV / JWT / 进制转换 / IP 子网 / IP 归属地 / 复制 / 下载 / 主题 / Service Worker 更新检测等）一律进 `common/utils/`。
+- **页面专属逻辑**（密码生成、Canvas 图片转换、terser worker 封装、离线大文件的下载与缓存、页面状态编排）放页面自身 `scripts/` 与 `components/`。
 - **禁止复制粘贴公共函数**到页面目录；需要就用 `import` 引用。
 - 页面文件夹结构约定统一（index.vue + components/ + styles/ + scripts/），某页不涉及某类时允许省略该子目录，但约定不变。
 
@@ -76,7 +76,12 @@ src/
 
 - 如后续引入后端 / 数据持久化，技术选型为 **.NET 10 + PostgreSQL**。
 - 新增 `src/api/` 服务层，通过 fetch 调用后端接口；前端目录结构不变。
-- v1 阶段无后端、无任何请求外发，全部工具在浏览器本地计算（隐私友好）。
+- v1 阶段无后端；工具计算全部在浏览器本地完成（隐私友好）。
+- **唯一例外**：部署层的 `GET /api/ip`（`deploy/server.js`）回报访问者出口 IP，供「IP 工具 → 我的 IP」使用。
+  它读反代头 `X-Real-IP` / `X-Forwarded-For`，不写日志、不做持久化，响应带 `Cache-Control: no-store`；
+  对应的前端调用集中在 `src/views/tools/ip-subnet/scripts/my-ip.js`。
+- **新增任何其他外发请求前，必须先回头修改本节**，并同步首页 / 页脚 / `index.html` / `manifest.webmanifest`
+  上的隐私表述，避免宣传口径与实际行为冲突。
 
 ## 8. 代码风格
 

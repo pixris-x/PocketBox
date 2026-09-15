@@ -208,8 +208,8 @@ export const tools = [
   {
     id: 'ip-subnet',
     path: '/tool/ip-subnet',
-    title: 'IP 子网计算',
-    description: 'IPv4 CIDR 子网信息（网络/广播/可用主机范围/地址类型）与同子网判定',
+    title: 'IP 工具',
+    description: 'CIDR 子网计算、IP 归属地查询（本地离线库）与我的公网 IP',
     icon: 'shuffle',
     category: 'dev',
     tags: ['网络'],

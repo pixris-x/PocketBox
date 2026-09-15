@@ -1,36 +1,36 @@
 # 口袋工具箱 PocketBox (pocketBox)
 
-一个纯前端的网页工具站：**Vite + Vue 3 + SCSS**，所有工具都在浏览器本地运行，**数据不会上传到任何服务器**（隐私友好）。
+一个网页工具站：**Vite + Vue 3 + SCSS** 前端 + 零依赖 Node 静态服务器（部署层），工具计算全部在浏览器本地完成，**数据不外发给第三方**（隐私友好）。
 
 > ⚠️ 开发 / 维护前请先阅读 [AGENTS.md](./AGENTS.md)（项目强制开发规则）。
 
 ## 功能
 
-| 工具            | 说明                                                              |
-| --------------- | ----------------------------------------------------------------- |
-| 随机强密码生成  | Web Crypto 真随机，长度 / 字符集 / 排除易混淆字符 / 批量生成      |
-| 图片格式转换    | PNG / JPEG / WebP 互转，质量与缩放调节，Canvas 实现               |
-| Base64 转换     | 文本（Unicode 安全）与文件的编解码                                |
-| MD5 哈希        | 文本与文件的 MD5 摘要，附安全提示                                 |
-| JavaScript 压缩 | terser 在 Web Worker 中运行，压缩 / 混淆开关，大小对比            |
-| JSON 工具       | 格式化 / 压缩 / 校验；层级树视图带类型着色、路径定位与节点复制    |
-| URL 编码 / 解码 | 组件编码 / 解码，兼容查询串 `+` 号                                |
-| 时间戳转换      | 秒 / 毫秒 ↔ 日期，本地 / UTC / ISO                                |
-| UUID 生成       | 批量生成 UUID v4                                                  |
-| 二维码生成      | 文本与链接转二维码，可调纠错级别并导出 PNG                        |
-| 文本 diff 对比  | 逐行对比两段文本，标出新增与删除的行                              |
-| 正则测试        | 实时查看正则匹配结果、捕获分组与替换效果                          |
-| 颜色格式转换    | HEX / RGB / HSL 互转，附对比度与可读性参考                        |
-| 文本批处理      | 批量去空白 / 去空行 / 去重 / 排序 / 大小写转换，附字数行数统计    |
-| 命名风格转换    | 拆词后在 camelCase、snake_case 等 8 种命名风格间互转              |
-| 单位换算        | 长度 / 重量 / 面积 / 体积 / 数据存储 / 温度，一次列全同分类单位   |
-| CSV ↔ JSON 互转 | 表格与 JSON 双向转换，支持引号转义与自定义分隔符                  |
-| JWT 解析        | 本地解码 Header / Payload 与有效期，令牌不外发                    |
-| SHA 哈希        | SHA-1 / 256 / 384 / 512 摘要，文本与文件均可，用于完整性校验      |
-| AES 加解密      | AES-GCM 文本加解密，PBKDF2 口令派生密钥，数据与口令不出浏览器     |
-| 进制转换        | 2/8/10/16 与任意 2-36 进制互转，整数走 BigInt 不丢精度            |
-| IP 子网计算     | IPv4 CIDR 子网信息（网络/广播/可用主机范围/地址类型）与同子网判定 |
-| 日期计算器      | 两日期之差（年/月/日 + 总天数）与日期加减，含工作日 / 跨月跨年    |
+| 工具            | 说明                                                                |
+| --------------- | ------------------------------------------------------------------- |
+| 随机强密码生成  | Web Crypto 真随机，长度 / 字符集 / 排除易混淆字符 / 批量生成        |
+| 图片格式转换    | PNG / JPEG / WebP 互转，质量与缩放调节，Canvas 实现                 |
+| Base64 转换     | 文本（Unicode 安全）与文件的编解码                                  |
+| MD5 哈希        | 文本与文件的 MD5 摘要，附安全提示                                   |
+| JavaScript 压缩 | terser 在 Web Worker 中运行，压缩 / 混淆开关，大小对比              |
+| JSON 工具       | 格式化 / 压缩 / 校验；层级树视图带类型着色、路径定位与节点复制      |
+| URL 编码 / 解码 | 组件编码 / 解码，兼容查询串 `+` 号                                  |
+| 时间戳转换      | 秒 / 毫秒 ↔ 日期，本地 / UTC / ISO                                  |
+| UUID 生成       | 批量生成 UUID v4                                                    |
+| 二维码生成      | 文本与链接转二维码，可调纠错级别并导出 PNG                          |
+| 文本 diff 对比  | 逐行对比两段文本，标出新增与删除的行                                |
+| 正则测试        | 实时查看正则匹配结果、捕获分组与替换效果                            |
+| 颜色格式转换    | HEX / RGB / HSL 互转，附对比度与可读性参考                          |
+| 文本批处理      | 批量去空白 / 去空行 / 去重 / 排序 / 大小写转换，附字数行数统计      |
+| 命名风格转换    | 拆词后在 camelCase、snake_case 等 8 种命名风格间互转                |
+| 单位换算        | 长度 / 重量 / 面积 / 体积 / 数据存储 / 温度，一次列全同分类单位     |
+| CSV ↔ JSON 互转 | 表格与 JSON 双向转换，支持引号转义与自定义分隔符                    |
+| JWT 解析        | 本地解码 Header / Payload 与有效期，令牌不外发                      |
+| SHA 哈希        | SHA-1 / 256 / 384 / 512 摘要，文本与文件均可，用于完整性校验        |
+| AES 加解密      | AES-GCM 文本加解密，PBKDF2 口令派生密钥，数据与口令不出浏览器       |
+| 进制转换        | 2/8/10/16 与任意 2-36 进制互转，整数走 BigInt 不丢精度              |
+| IP 工具         | CIDR 子网计算与同子网判定；IP 归属地查询（本地离线库）；我的公网 IP |
+| 日期计算器      | 两日期之差（年/月/日 + 总天数）与日期加减，含工作日 / 跨月跨年      |
 
 > 首页支持按关键词搜索（匹配标题 / 描述 / id / 标签）与按分类筛选，分类定义见
 > `src/data/tools.js` 导出的 `categories`。
@@ -62,7 +62,7 @@ pocketBox/
 ├─ src/
 │  ├─ common/                  # 公共统一目录
 │  │  ├─ styles/               #   设计 token（明暗 × 配色两个维度）、mixins、base
-│  │  ├─ utils/                #   公共函数（base64/md5/sha/aes/json/JSON 树/url/时间戳/CSV/JWT/文本处理/命名/进制/IP子网/日期/Service Worker 更新检测…）
+│  │  ├─ utils/                #   公共函数（base64/md5/sha/aes/json/JSON 树/url/时间戳/CSV/JWT/文本处理/命名/进制/IP子网/IP归属地/日期/Service Worker 更新检测…）
 │  │  └─ components/           #   自研 UI 组件库（UiButton/UiInput/UiSlider/…）
 │  ├─ router/                  # 路由（由 data/tools.js 自动生成）
 │  ├─ data/tools.js            # 工具元数据（首页网格 + 分类筛选 + 路由的唯一数据源）
@@ -77,10 +77,11 @@ pocketBox/
 │        ├─ styles/            #   页面样式
 │        └─ scripts/           #   页面脚本（如 terser worker、单位换算数据表）
 ├─ deploy/                     # 部署相关
-│  ├─ server.js                #   容器内零依赖 Node 静态服务器（含 SPA fallback）
+│  ├─ server.js                #   容器内零依赖 Node 静态服务器（SPA fallback + /api/ip）
 │  └─ nginx.conf               #   宿主机 nginx 反向代理配置示例
 ├─ public/                     # 静态资产（favicon / apple-touch-icon / logo.svg /
-│                              #   manifest.webmanifest / sw.js / PWA 图标）
+│                              #   manifest.webmanifest / sw.js / PWA 图标 /
+│                              #   ip2region/ 离线 IP 归属地库）
 ├─ tests/                      # 单元测试（utils/ 公共纯函数、tools/ 页面私有算法）
 ├─ Dockerfile                  # 两阶段构建，运行阶段只含 dist + server.js
 └─ docker-compose.yml          # 映射 8701:3000
@@ -100,7 +101,7 @@ pocketBox/
 
 ```
 tests/
-├─ utils/          # 公共纯函数，按模块一一对应（20 个 spec）
+├─ utils/          # 公共纯函数，按模块一一对应（19 个 spec）
 └─ tools/          # 页面私有算法（如单位换算的数据表 scripts/units.js）
 ```
 
@@ -130,6 +131,8 @@ tests/
   - 导航请求：网络优先，离线回退 `/index.html`（前端路由接着渲染对应页面或 404 页）
   - `/assets/`（文件名带 hash）：缓存优先，可长期复用
   - 其他同源资源：Stale-While-Revalidate
+  - `/api/` 与 `/ip2region/`：**不交给 SW**，由页面自行处理 —— API 响应一旦被缓存就会持续返回过期的出口 IP；11MB 的离线库塞进 shell 桶会随构建指纹变化被反复清理重下
+- `activate` 清理旧缓存时按前缀白名单放过 `pocketbox-ipdb-`，否则每次发版都会让已下载的用户重下 11MB
 - 注册逻辑在 `src/common/utils/sw.js`（由 `src/main.js` 调用），**仅生产构建注册**（`import.meta.env.PROD`），不干扰开发环境 HMR
 - 更新检测：`sw.js` 的 install 阶段是无条件 `skipWaiting()`、activate 阶段 `clients.claim()`，新版本会立即接管。因此页面侧**不能用 `registration.waiting` 判断是否有新版本**（正常更新路径下它恒为 `null`），而是监听 `controllerchange`，随后由 `AppUpdatePrompt` 提示「已更新到新版本」，由用户决定何时刷新（首次安装不误报）。
 
@@ -167,6 +170,18 @@ docker compose down            # 停止并移除容器
 宿主机无需安装 Node —— `pnpm install` 与 `pnpm build` 都在容器构建阶段完成。
 
 > `deploy/server.js` 的 SPA fallback 是 History 路由的命脉：无扩展名的未知路径回退 `index.html` 交给前端路由渲染 404 页，带扩展名的真实 404。
+
+`deploy/server.js` 另外提供 `GET /api/ip`，回报访问者的出口 IP，供「IP 工具 → 我的 IP」使用。它优先读反代
+传入的 `X-Real-IP` / `X-Forwarded-For`（`deploy/nginx.conf` 已配好这两个头），直连时回落连接地址，并把
+`::ffff:1.2.3.4` 这类 IPv6-mapped 形式还原成 IPv4；响应带 `Cache-Control: no-store`，服务端不写日志。
+**这项功能只在容器部署下可用**，`pnpm dev` 与纯静态托管没有该端点，页面会给出相应提示。
+
+> 若将来在 nginx 前再挂 CDN，「我的 IP」会显示 CDN 节点地址而不是访客地址，需要在宿主机启用
+> `ngx_http_realip_module`（`set_real_ip_from <CDN 回源段>;` + `real_ip_header X-Forwarded-For;`）
+> 才能还原真实客户端地址。
+
+静态文件侧另有一处与性能相关的约定：非 `/assets/` 的响应走 `no-cache` + `ETag` 协商缓存。这一步是
+必需的 —— 11MB 的离线 IP 库没有内容 hash 文件名，缺了 `ETag` 就会每次访问都整包重传。
 
 <details>
 <summary>环境没有 compose 插件？用等价的 <code>docker run</code></summary>
@@ -216,7 +231,7 @@ docker rm -f pocketbox      # 停止并移除
 
 ## 未来后端（.NET 10 + PostgreSQL）
 
-v1 为纯前端、无任何请求外发。如需后端 / 数据持久化（例如保存工具历史、用户配置、云端文件处理），扩展方式：
+v1 为纯前端，唯一的服务端逻辑是部署层的 `/api/ip`（回报访问者出口 IP，见上文「部署」）。如需后端 / 数据持久化（例如保存工具历史、用户配置、云端文件处理），扩展方式：
 
 1. 新增 `src/api/` 服务层，通过 fetch 调用后端接口，前端目录结构不变；
 2. 后端采用 .NET 10 Minimal API + PostgreSQL；
@@ -234,6 +249,12 @@ v1 为纯前端、无任何请求外发。如需后端 / 数据持久化（例�
 | vite               | ^7    | 构建                                                          |
 | @vitejs/plugin-vue | ^6    | Vue SFC 编译                                                  |
 | sass               | ^1.80 | SCSS 编译                                                     |
+
+### 非 npm 依赖
+
+| 名称      | 版本    | 用途                                                                                                                          |
+| --------- | ------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| ip2region | v4 数据 | 离线 IP 归属地库，Apache-2.0 / MIT 双许可，以静态文件置于 `public/ip2region/`（含 LICENSE），由前端按需下载并缓存，不参与构建 |
 
 ### 开发依赖
 
