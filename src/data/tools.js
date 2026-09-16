@@ -143,6 +143,15 @@ export const tools = [
     tags: ['文本'],
   },
   {
+    id: 'whitespace',
+    path: '/tool/whitespace',
+    title: '空白符清理',
+    description: '压缩连续空格与制表符、清理全角空格与 NBSP、删空行或合并单行',
+    icon: 'trim',
+    category: 'text',
+    tags: ['文本'],
+  },
+  {
     id: 'naming-convert',
     path: '/tool/naming-convert',
     title: '命名风格转换',

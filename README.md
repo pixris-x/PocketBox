@@ -22,6 +22,7 @@
 | 正则测试        | 实时查看正则匹配结果、捕获分组与替换效果                                |
 | 颜色格式转换    | HEX / RGB / HSL 互转，附对比度与可读性参考                              |
 | 文本批处理      | 批量去空白 / 去空行 / 去重 / 排序 / 大小写转换，附字数行数统计          |
+| 空白符清理      | 压缩连续空格与制表符、清理全角空格与 NBSP、删空行或合并单行             |
 | 命名风格转换    | 拆词后在 camelCase、snake_case 等 8 种命名风格间互转                    |
 | 单位换算        | 长度 / 重量 / 面积 / 体积 / 数据存储 / 温度，一次列全同分类单位         |
 | CSV ↔ JSON 互转 | 表格与 JSON 双向转换，支持引号转义与自定义分隔符                        |
@@ -71,7 +72,7 @@ pocketBox/
 ├─ src/
 │  ├─ common/                  # 公共统一目录
 │  │  ├─ styles/               #   设计 token（明暗 × 配色两个维度）、mixins、base
-│  │  ├─ utils/                #   公共函数（base64/md5/sha/aes/json/JSON 树/url/时间戳/CSV/JWT/文本处理/命名/进制/IP子网/日期/Service Worker 更新检测…）
+│  │  ├─ utils/                #   公共函数（base64/md5/sha/aes/json/JSON 树/url/时间戳/CSV/JWT/文本处理/空白清理/命名/进制/IP子网/日期/Service Worker 更新检测…）
 │  │  └─ components/           #   自研 UI 组件库（UiButton/UiInput/UiSlider/…）
 │  ├─ router/                  # 路由（由 data/tools.js 自动生成）
 │  ├─ data/tools.js            # 工具元数据（首页网格 + 分类筛选 + 路由的唯一数据源）
@@ -244,6 +245,41 @@ docker compose down            # 停止并移除容器
 > 若将来在 nginx 前再挂 CDN，`X-Real-IP` 会变成 CDN 节点地址、「我的 IP」随之显示错误结果，
 > 需要在宿主机启用 `ngx_http_realip_module`（`set_real_ip_from <CDN 回源段>;` +
 > `real_ip_header X-Forwarded-For;`）才能还原真实客户端地址。
+
+<details>
+<summary>接入已有的 nginx（含宝塔面板）：<code>location /api/</code> 怎么加</summary>
+
+`deploy/nginx.conf` 是**独立示例**；真实环境往往已经有自己的站点配置（证书路径、其他站点、面板模板）。
+此时**不要整份替换**，只补下面这一段分流即可，其余保持不动：
+
+```nginx
+# 加进现有 server 块。若 80 与 443 写在同一个 server 块里，只需加一次
+location ^~ /api/ {
+    proxy_pass http://127.0.0.1:8702;        # ⚠ 末尾不要加斜杠，否则 /api 前缀会被吃掉
+
+    proxy_http_version 1.1;
+    proxy_set_header Host $http_host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+}
+```
+
+**原有 `location ^~ /`（指向前端 8701）无需调整位置。** nginx 的匹配规则是「**最长 `^~` 前缀优先**」：
+`/api/ip` 同时匹配 `/api/` 与 `/`，而 `/api/` 更长，所以它胜出 —— 与两个块谁写在前面无关。
+
+**宝塔面板**：走「配置文件 → 自定义配置文件 → 选择配置块 `server块`」，把上面这段粘进去后保存并重载。
+面板会把它写进 `/www/server/panel/vhost/nginx/extension/<域名>/`，再由主配置里的 `include` 引入；
+好处是面板重新生成主配置时不会把它冲掉，比直接改主配置文件更稳。
+
+验证（两条都该返回 JSON，而不是 HTML）：
+
+```bash
+curl -i https://<域名>/api/ip
+curl -i 'https://<域名>/api/ip/region?ip=114.114.114.114'
+```
+
+</details>
 
 <details>
 <summary>环境没有 compose 插件？用等价的 <code>docker run</code></summary>

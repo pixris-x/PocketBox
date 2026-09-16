@@ -64,4 +64,6 @@ export const ICON_PATHS = {
   regex: '<path d="M15 7l-4 10"/><path d="M17 5a3 3 0 1 0-3.2 4.5"/><circle cx="7" cy="17" r="2"/>',
   qrcode:
     '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM19 14h2v2h-2zM14 19h2v2h-2zM19 19h2v2h-2z"/>',
+  // 空白清理：两侧空白向中间收拢
+  trim: '<polyline points="4 9 8 9 8 5"/><polyline points="20 9 16 9 16 5"/><polyline points="4 15 8 15 8 19"/><polyline points="20 15 16 15 16 19"/><line x1="10" y1="4" x2="10" y2="20"/><line x1="14" y1="4" x2="14" y2="20"/>',
 }
