@@ -116,6 +116,23 @@
     }
   }
 
+  // 最近使用：与普通分组同形，右侧多一个「清除」
+  &__recent {
+    margin-bottom: var(--space-7);
+  }
+
+  &__recent-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+
+    .home__group-title {
+      margin-bottom: 0;
+    }
+  }
+
   &__empty {
     display: flex;
     flex-direction: column;

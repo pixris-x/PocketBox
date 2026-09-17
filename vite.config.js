@@ -1,6 +1,6 @@
 import { fileURLToPath, URL } from 'node:url'
 import { createHash } from 'node:crypto'
-import { readFileSync, readdirSync, writeFileSync } from 'node:fs'
+import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
@@ -49,6 +49,11 @@ function serviceWorkerVersion() {
     apply: 'build',
     closeBundle() {
       const swPath = join(distDir, SW_FILE)
+
+      // 构建在渲染/写入阶段失败时，rollup 也会走 closeBundle（产物并不存在）。
+      // 此处若直接读文件会抛 ENOENT，把真正的构建错误盖掉，所以先判断存在性。
+      if (!existsSync(swPath)) return
+
       const source = readFileSync(swPath, 'utf-8')
 
       // 没替换成功会导致用户长期停留在旧缓存且难以排查，直接让构建失败

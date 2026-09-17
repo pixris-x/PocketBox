@@ -10,9 +10,15 @@
     background-color 0.16s ease,
     border-color 0.16s ease,
     color 0.16s ease,
-    box-shadow 0.16s ease;
+    box-shadow 0.16s ease,
+    transform 0.1s ease;
   user-select: none;
   white-space: nowrap;
+
+  // 按下时轻微回弹，给出触感反馈
+  &:active:not(.is-disabled) {
+    transform: scale(0.97);
+  }
 
   &:focus-visible {
     outline: none;

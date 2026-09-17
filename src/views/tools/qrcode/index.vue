@@ -1,109 +1,60 @@
 <script setup>
-// 二维码生成页
-import { computed, onMounted, ref, watch } from 'vue'
+// 合并页容器：UiTabs 切换子面板，当前 Tab 同步到 URL query（可分享 / 刷新保留 / 承接旧链接重定向）
+import { computed, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import ToolShell from '@/components/ToolShell/index.vue'
-import { downloadDataUrl } from '@/common/utils/download'
-import { buildMatrix } from './scripts/qrcode'
+import GeneratePanel from './components/GeneratePanel/index.vue'
+import ScanPanel from './components/ScanPanel/index.vue'
 
-const text = ref('https://example.com')
-const level = ref('M')
-const size = ref(256)
-const canvasRef = ref(null)
-
-const LEVELS = [
-  { label: 'L · 7%', value: 'L' },
-  { label: 'M · 15%', value: 'M' },
-  { label: 'Q · 25%', value: 'Q' },
-  { label: 'H · 30%', value: 'H' },
+const TABS = [
+  { label: '生成', value: 'generate' },
+  { label: '识别', value: 'scan' },
 ]
 
-const matrix = computed(() => buildMatrix(text.value, level.value))
-const isOverflow = computed(() => matrix.value === undefined)
-const isEmpty = computed(() => matrix.value === null)
+const PANELS = {
+  generate: GeneratePanel,
+  scan: ScanPanel,
+}
 
-const QUIET_ZONE = 4 // 标准要求的静默区（模块数）
+const DEFAULT_TAB = 'generate'
 
-function draw() {
-  const canvas = canvasRef.value
-  const model = matrix.value
-  if (!canvas || !model) return
+const route = useRoute()
+const router = useRouter()
 
-  const total = model.count + QUIET_ZONE * 2
-  const scale = Math.max(1, Math.floor(size.value / total))
-  const canvasSize = total * scale
-  canvas.width = canvasSize
-  canvas.height = canvasSize
+function pickTab(value) {
+  const tab = typeof value === 'string' ? value : ''
+  return tab in PANELS ? tab : DEFAULT_TAB
+}
 
-  const ctx = canvas.getContext('2d')
-  // 二维码需在白底黑模块下才保证识别率，属功能性颜色，不走主题 token
-  ctx.fillStyle = '#ffffff'
-  ctx.fillRect(0, 0, canvasSize, canvasSize)
-  ctx.fillStyle = '#000000'
-  for (let row = 0; row < model.count; row++) {
-    for (let col = 0; col < model.count; col++) {
-      if (!model.isDark(row, col)) continue
-      ctx.fillRect((col + QUIET_ZONE) * scale, (row + QUIET_ZONE) * scale, scale, scale)
-    }
+const active = ref(pickTab(route.query.tab))
+const panel = computed(() => PANELS[active.value])
+
+// 地址栏直接改 ?tab= 或从旧路径重定向过来时同步状态
+watch(
+  () => route.query.tab,
+  (value) => {
+    active.value = pickTab(value)
   }
-}
+)
 
-function onDownload() {
-  if (!canvasRef.value) return
-  downloadDataUrl(canvasRef.value.toDataURL('image/png'), 'qrcode.png')
+function onChange(value) {
+  // replace 而非 push：切 Tab 不该产生大量历史记录
+  router.replace({ query: { ...route.query, tab: value } })
 }
-
-onMounted(draw)
-watch([text, level, size], draw)
 </script>
 
 <template>
   <ToolShell
-    title="二维码生成"
-    description="将文本或链接生成二维码，支持纠错级别调节，可导出 PNG。"
+    title="二维码"
+    description="文本与链接生成二维码（可调纠错级别并导出 PNG），也能识别图片中的二维码并拆解 WiFi 分享码。"
   >
     <UiCard>
-      <UiSection title="生成结果">
-        <div class="qrcode-preview">
-          <canvas v-show="!isOverflow && !isEmpty" ref="canvasRef" class="qrcode-canvas" />
-          <p v-if="isEmpty" class="qrcode-placeholder">输入内容后生成二维码</p>
-          <UiTag v-else-if="isOverflow" variant="danger">
-            内容过长，当前纠错级别下无法生成，请缩短内容或降低纠错级别
-          </UiTag>
-        </div>
-        <div v-if="!isOverflow && !isEmpty" class="qrcode-meta">
-          <UiTag variant="neutral">{{ matrix.count }} × {{ matrix.count }} 模块</UiTag>
-          <UiTag variant="neutral">纠错级别 {{ level }}</UiTag>
-        </div>
-        <div class="qrcode-actions">
-          <UiButton size="sm" :disabled="isOverflow || isEmpty" @click="onDownload">
-            <UiIcon name="download" :size="14" />
-            下载 PNG
-          </UiButton>
-        </div>
-      </UiSection>
-
-      <UiSection title="活动内容">
-        <UiTextarea v-model="text" :rows="4" placeholder="输入文本、链接或任意内容…" />
-      </UiSection>
-
-      <UiSection title="生成选项" description="纠错级别越高，容错能力越强，但容量越小">
-        <div class="qrcode-row">
-          <span class="qrcode-row__label">纠错级别</span>
-          <UiSelect v-model="level" :options="LEVELS" class="qrcode-row__control" />
-        </div>
-        <div class="qrcode-row">
-          <span class="qrcode-row__label">导出尺寸</span>
-          <UiSlider
-            v-model="size"
-            :min="128"
-            :max="512"
-            :step="32"
-            show-value
-            class="qrcode-row__control"
-          />
-        </div>
+      <UiSection title="功能">
+        <UiTabs v-model="active" :tabs="TABS" @update:model-value="onChange" />
       </UiSection>
     </UiCard>
+
+    <component :is="panel" />
   </ToolShell>
 </template>
 

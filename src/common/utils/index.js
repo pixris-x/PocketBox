@@ -1,5 +1,9 @@
 // 公共函数汇总导出
 // 使用：import { copyText, formatBytes, ... } from '@/common/utils'
+//
+// ⚠ 页面请优先按具体模块路径引入（如 '@/common/utils/totp'）。
+//   本入口包含 pdf-tool / markdown / yaml-json 等带较大依赖的模块，
+//   被引用时会把它们的依赖一并打进引用方所在 chunk。
 export * from './toast'
 export * from './theme'
 export * from './copy'
@@ -32,3 +36,8 @@ export * from './md-table'
 export * from './xml-json'
 export * from './ico'
 export * from './pdf-tool'
+export * from './home-state'
+export * from './totp'
+export * from './curl'
+export * from './yaml-json'
+export * from './markdown'

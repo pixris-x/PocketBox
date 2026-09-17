@@ -29,8 +29,9 @@ src/
    ├─ NotFound/     # 404 页（非工具页，在 router/index.js 手工注册，不进 tools.js）
    └─ tools/
       └─ <tool-id>/ # ★ 每个工具页一个独立文件夹
-         ├─ index.vue      # 主 vue
+         ├─ index.vue      # 主 vue（合并页时是容器：UiTabs + 子面板）
          ├─ components/    # 页面私有组件
+         │  └─ <Name>Panel/ # 合并页的子面板（整体搬迁，内部相对路径保持有效）
          ├─ styles/        # 页面私有样式
          └─ scripts/       # 页面私有脚本（逻辑/worker/接口调用封装）
 ```
@@ -58,7 +59,10 @@ scripts/                 # 构建辅助脚本（Node ESM，非站点代码）
 
 ### 2.1 归属原则（重要）
 
-- **可复用的纯算法**（base64 / md5 / sha / aes / json / JSON 树 / url / 查询串 / 时间戳 / 日期 / 颜色 / diff / 文本批处理 / 空白清理 / EXIF / Cron / Unicode / Markdown 表格 / XML↔JSON / ICO / PDF / 命名风格 / CSV / JWT / 进制转换 / IP 子网 / 二维码文本分类 / 复制 / 下载 / 主题 / Service Worker 更新检测等）一律进 `common/utils/`。
+- **可复用的纯算法**（base64 / md5 / sha / aes / totp / json / JSON 树 / url / 查询串 / 时间戳 / 日期 / 颜色 / diff / 文本批处理 / 空白清理 / EXIF / Cron / Unicode / Markdown(渲染) / Markdown 表格 / XML↔JSON / YAML↔JSON / ICO / PDF / curl 解析 / 命名风格 / CSV / JWT / 进制转换 / IP 子网 / 二维码文本分类 / 复制 / 下载 / 主题 / Service Worker 更新检测等）一律进 `common/utils/`。
+  站点级状态（首页筛选条件、最近使用工具等本地持久化）同样进 `common/utils/`（见 `home-state.js`），页面只负责渲染。
+  ⚠ 页面按**具体模块路径**引入（`@/common/utils/totp`），不要走 `@/common/utils` 汇总入口——
+  汇总会连带解析 pdf-lib / marked / js-yaml 等大依赖。
 - **页面专属逻辑**（密码生成、Canvas 图片转换、terser worker 封装、页面状态编排、接口调用封装）放页面自身 `scripts/` 与 `components/`。
 - **需要服务端才能做或需要联网的能力**（IP 归属地查询、访客 IP 探测）放 `backend/`；页面里的调用必须封装进 `scripts/` 模块，不要在组件中散写 `fetch`。
 - **禁止复制粘贴公共函数**到页面目录；需要就用 `import` 引用。
@@ -70,6 +74,10 @@ scripts/                 # 构建辅助脚本（Node ESM，非站点代码）
 - 新 UI 组件一律放入 `src/common/components/`，并在 `index.js` 注册后使用。
 - 组件样式统一使用设计 token（CSS 变量），禁止出现硬编码颜色值。
 - 操作反馈统一走 `useToast`。
+- **页面切换动效**统一由 `App.vue` 的 `<router-view>` + `<Transition name="page">` 提供，
+  新增页面无需处理动效，但**必须保持单根元素**（多根会让 Transition 失效）。
+  页面内元素的入场动效写在各自组件样式里（如 `UiCard`），全局必须保留
+  `prefers-reduced-motion` 兜底（见 `common/styles/_base.scss`）。
 
 ## 4. 路由与工具注册
 
@@ -79,6 +87,13 @@ scripts/                 # 构建辅助脚本（Node ESM，非站点代码）
 - `category` 必须取自同文件导出的 `categories`（首页分类筛选项的唯一来源，新增分类在此登记）。
 - `tags` 用于卡片角标展示，同时作为首页关键词搜索的匹配字段。
 - 首页网格、分类筛选与路由均由 `tools.js` 自动生成，禁止手写路由表、首页卡片或分类项。
+- **合并页规矩**（2026-09-18 起）：同输入形态、低频的同类工具合并为一页，
+  用 `UiTabs` 切换 `components/<Name>Panel/` 子面板，当前 Tab 同步到 URL 的 `?tab=xxx`。
+  三条硬要求：
+  1. 被合并的旧路径必须在 `src/router/index.js` 的 `LEGACY_REDIRECTS` 登记重定向到「新页 + 对应 Tab」，否则旧链接与收藏 404；
+  2. 旧关键词要保留在新条目的 `tags` 里，否则首页搜索会漏；
+  3. 单个合并页的 Tab 不超过 4 个，超过说明该拆。
+     页面样式里引用公共设计 token 一律用 `@/common/styles/...` 别名（相对路径在目录层级变化时会失效）。
 
 ## 5. 命名约定
 

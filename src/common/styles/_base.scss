@@ -284,3 +284,16 @@ body,
 #app {
   min-height: 100%;
 }
+
+// 无障碍兜底：系统开启「减少动态效果」时，全站动画/过渡压缩到几乎立即完成
+// （页面切换的位移另有专门处理，见 App.vue）
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

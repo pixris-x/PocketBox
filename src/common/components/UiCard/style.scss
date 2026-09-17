@@ -4,7 +4,35 @@
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
 
+  // 入场：卡片比页面标题稍晚浮现，形成层次（而非整页一起出现）
+  @media (prefers-reduced-motion: no-preference) {
+    animation: ui-card-in 0.32s ease-out both;
+  }
+
   &.is-padded {
     padding: var(--space-5);
+  }
+}
+
+// 同页多张卡片依次入场（最多错开两档，避免页面出现明显延迟感）
+@media (prefers-reduced-motion: no-preference) {
+  .ui-card:nth-of-type(2) {
+    animation-delay: 60ms;
+  }
+
+  .ui-card:nth-of-type(n + 3) {
+    animation-delay: 120ms;
+  }
+}
+
+@keyframes ui-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
   }
 }

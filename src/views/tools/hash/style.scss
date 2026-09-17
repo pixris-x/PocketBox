@@ -1,0 +1,4 @@
+// 合并页容器：子面板自带卡片与样式，这里让相邻卡片保持统一间距
+:deep(.ui-card) + :deep(.ui-card) {
+  margin-top: var(--space-4);
+}

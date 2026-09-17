@@ -1,0 +1,238 @@
+@use '@/common/styles/_variables.scss' as *;
+
+.json-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+
+  &__left {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  &__right {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+  }
+
+  &__sort {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: var(--font-sm);
+    color: var(--color-text-secondary);
+  }
+}
+
+// 视图切换：同时是「生成树」后的滚动锚点，
+// scroll-margin-top 抵掉 sticky 顶栏高度，避免滚动后被顶栏遮住
+.json-tabs {
+  max-width: 100%;
+  margin-top: var(--space-5);
+  margin-bottom: var(--space-5);
+  overflow-x: auto;
+  scroll-margin-top: calc(#{$header-height} + var(--space-3));
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.json-error {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+  font-size: var(--font-sm);
+
+  svg {
+    flex-shrink: 0;
+  }
+}
+
+.json-actions {
+  margin-top: var(--space-3);
+}
+
+.json-empty-hint {
+  padding: var(--space-6) var(--space-4);
+  text-align: center;
+  font-size: var(--font-sm);
+  color: var(--color-text-muted);
+}
+
+// ---------- 结构概览 ----------
+.jtree-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
+  gap: var(--space-3);
+
+  &__item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface-hover);
+  }
+
+  &__value {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--color-text);
+  }
+
+  &__label {
+    font-size: var(--font-sm);
+    color: var(--color-text-secondary);
+  }
+}
+
+// ---------- 层级树 ----------
+.jtree-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.jtree {
+  margin-top: var(--space-3);
+  padding: var(--space-3) var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  overflow-x: auto;
+
+  &__row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding-right: var(--space-3);
+    min-height: 30px;
+    border-radius: var(--radius-sm);
+
+    &:hover {
+      background: var(--color-surface-hover);
+
+      .jtree__copy {
+        opacity: 1;
+      }
+    }
+  }
+
+  // 层级引导虚线：每个深度一层，连续行视觉上连成竖线
+  &__guide {
+    flex-shrink: 0;
+    align-self: stretch;
+    width: 10px;
+    margin-left: 8px;
+    border-left: 1px dotted var(--color-json-line);
+  }
+
+  // 折叠方块（⊟ / ▸）
+  &__toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    border: 1px solid var(--color-border-strong);
+    border-radius: 3px;
+    color: var(--color-text-secondary);
+    background: var(--color-surface);
+
+    &:hover {
+      color: var(--color-text);
+      border-color: var(--color-text-muted);
+    }
+
+    // 叶子行占位，保证与可折叠行对齐
+    &--leaf {
+      visibility: hidden;
+      border-color: transparent;
+    }
+  }
+
+  &__key {
+    flex-shrink: 0;
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: var(--font-sm);
+    font-weight: 600;
+    color: var(--color-json-key);
+  }
+
+  &__colon {
+    flex-shrink: 0;
+    color: var(--color-text-muted);
+  }
+
+  &__value {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: var(--font-sm);
+    font-family: var(--font-mono);
+    color: var(--color-text-secondary);
+
+    // 值按类型着色（字符串橙红 / 数字与布尔蓝 / null 灰 / 容器摘要中性灰）
+    &.is-string {
+      color: var(--color-json-string);
+    }
+
+    &.is-number,
+    &.is-boolean {
+      color: var(--color-json-number);
+    }
+
+    &.is-null {
+      color: var(--color-json-null);
+    }
+
+    &.is-object,
+    &.is-array {
+      color: var(--color-text-muted);
+    }
+  }
+
+  &__copy {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: var(--radius-sm);
+    color: var(--color-text-muted);
+    opacity: 0;
+    transition: opacity 0.15s ease;
+
+    &:hover {
+      background: var(--color-border);
+      color: var(--color-text);
+    }
+
+    // 触屏设备没有 hover，常显以免无法操作
+    @media (hover: none) {
+      opacity: 1;
+    }
+  }
+}

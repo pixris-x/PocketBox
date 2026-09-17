@@ -1,0 +1,78 @@
+.totp {
+  &__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    margin-top: var(--space-3);
+  }
+
+  &__meta,
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  &__actions {
+    margin-left: auto;
+  }
+
+  &__error {
+    margin: var(--space-3) 0 0;
+    font-size: var(--font-sm);
+    color: var(--color-danger);
+  }
+
+  &__code-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  &__code {
+    font-family: var(--font-mono);
+    font-size: 40px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--color-primary);
+    line-height: 1.1;
+  }
+
+  &__progress {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-top: var(--space-3);
+  }
+
+  &__progress-bar {
+    flex: 1;
+    height: 6px;
+    overflow: hidden;
+    background: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
+  }
+
+  &__progress-fill {
+    height: 100%;
+    background: var(--color-primary);
+    border-radius: var(--radius-full);
+    transition: width 0.3s linear;
+  }
+
+  &__remaining {
+    font-size: var(--font-xs);
+    color: var(--color-text-muted);
+    white-space: nowrap;
+  }
+
+  &__hint {
+    margin: var(--space-3) 0 0;
+    font-size: var(--font-xs);
+    color: var(--color-text-muted);
+  }
+}
