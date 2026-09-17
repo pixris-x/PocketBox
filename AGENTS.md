@@ -46,9 +46,19 @@ backend/                 # ★ .NET 10 后端（只放需要服务端才能做�
    └─ Contracts/         #   请求 / 响应模型
 ```
 
+```
+electron/                # ★ 桌面端（Electron）外壳，仅生产构建使用
+├─ main.cjs             #   主进程：app:// 协议托管 dist/ + 窗口生命周期
+└─ preload.cjs          #   预加载：仅暴露 window.pocketbox.desktop 标识（contextIsolation + sandbox）
+
+scripts/                 # 构建辅助脚本（Node ESM，非站点代码）
+├─ electron-dev.mjs     #   编程式起 Vite dev server + spawn Electron
+└─ electron-build.mjs   #   注入 VITE_API_BASE → vite build → electron-builder
+```
+
 ### 2.1 归属原则（重要）
 
-- **可复用的纯算法**（base64 / md5 / sha / aes / json / JSON 树 / url / 时间戳 / 日期 / 颜色 / diff / 文本批处理 / 命名风格 / CSV / JWT / 进制转换 / IP 子网 / 复制 / 下载 / 主题 / Service Worker 更新检测等）一律进 `common/utils/`。
+- **可复用的纯算法**（base64 / md5 / sha / aes / json / JSON 树 / url / 查询串 / 时间戳 / 日期 / 颜色 / diff / 文本批处理 / 空白清理 / EXIF / Cron / Unicode / Markdown 表格 / XML↔JSON / ICO / PDF / 命名风格 / CSV / JWT / 进制转换 / IP 子网 / 二维码文本分类 / 复制 / 下载 / 主题 / Service Worker 更新检测等）一律进 `common/utils/`。
 - **页面专属逻辑**（密码生成、Canvas 图片转换、terser worker 封装、页面状态编排、接口调用封装）放页面自身 `scripts/` 与 `components/`。
 - **需要服务端才能做或需要联网的能力**（IP 归属地查询、访客 IP 探测）放 `backend/`；页面里的调用必须封装进 `scripts/` 模块，不要在组件中散写 `fetch`。
 - **禁止复制粘贴公共函数**到页面目录；需要就用 `import` 引用。
@@ -56,7 +66,7 @@ backend/                 # ★ .NET 10 后端（只放需要服务端才能做�
 
 ## 3. UI 规范
 
-- 凡可用自研 UI 库组件（`UiButton` / `UiInput` / `UiSlider` / `UiSelect` / `UiTabs` / `UiCard` / `UiTag` / `UiSwitch` / `UiCheckbox` / `UiToast` 等）的场景，**必须使用组件库**，禁止另写一套样式。
+- 凡可用自研 UI 库组件（`UiButton` / `UiInput` / `UiTextarea` / `UiSlider` / `UiSelect` / `UiTabs` / `UiCard` / `UiSection` / `UiTag` / `UiSwitch` / `UiCheckbox` / `UiDivider` / `UiIcon` / `UiDropzone` / `UiToast` 等）的场景，**必须使用组件库**，禁止另写一套样式。
 - 新 UI 组件一律放入 `src/common/components/`，并在 `index.js` 注册后使用。
 - 组件样式统一使用设计 token（CSS 变量），禁止出现硬编码颜色值。
 - 操作反馈统一走 `useToast`。
