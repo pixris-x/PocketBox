@@ -1,9 +1,13 @@
 // ============================================================
 // IP 查询：只请求本站服务端 API（backend/PocketBox.Api），不经任何第三方。
-//   fetchMyIp()          GET /api/ip          → 访问者自己的公网 IP
-//   lookupRegion(ip?)    GET /api/ip/region   → 归属地，省略 ip 即查访问者自己
+//   fetchMyIp()          GET {API_BASE}/api/ip          → 访问者自己的公网 IP
+//   lookupRegion(ip?)    GET {API_BASE}/api/ip/region   → 归属地，省略 ip 即查访问者自己
 // 服务端实现见 backend/PocketBox.Api/Endpoints/IpEndpoints.cs
+// API_BASE：Web 构建不设置 → 空串，走同源相对路径（nginx 分流）；
+//           Electron 构建由 scripts/electron-build.mjs 注入线上地址（CORS 白名单 app://pocketbox）。
 // ============================================================
+
+const API_BASE = import.meta.env.VITE_API_BASE || ''
 
 async function requestJson(url) {
   let response
@@ -33,7 +37,7 @@ async function requestJson(url) {
 }
 
 export async function fetchMyIp() {
-  const data = await requestJson('/api/ip')
+  const data = await requestJson(`${API_BASE}/api/ip`)
   if (!data.ip) {
     throw new Error('服务端未返回有效的 IP')
   }
@@ -42,6 +46,8 @@ export async function fetchMyIp() {
 
 export async function lookupRegion(ip) {
   const text = String(ip ?? '').trim()
-  const url = text ? `/api/ip/region?ip=${encodeURIComponent(text)}` : '/api/ip/region'
+  const url = text
+    ? `${API_BASE}/api/ip/region?ip=${encodeURIComponent(text)}`
+    : `${API_BASE}/api/ip/region`
   return requestJson(url)
 }

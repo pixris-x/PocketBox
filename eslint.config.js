@@ -53,4 +53,13 @@ export default [
       },
     },
   },
+  {
+    // Electron 主进程 / 预加载（CommonJS）与 Node 辅助脚本
+    files: ['electron/**/*.cjs', 'scripts/**/*.mjs'],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+      },
+    },
+  },
 ]

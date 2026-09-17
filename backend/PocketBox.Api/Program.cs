@@ -33,7 +33,18 @@ builder.Services.AddOpenApi(options =>
     );
 });
 
+// 桌面端（Electron）页面源是自定义协议 app://pocketbox，访问线上 API 属跨源。
+// 白名单只放行该 Origin 的 GET 请求；Web 端始终同源，不受 CORS 影响。
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+        policy.WithOrigins("app://pocketbox").WithMethods("GET").WithHeaders("Accept")
+    );
+});
+
 var app = builder.Build();
+
+app.UseCors();
 
 // Swagger UI 仅在开发环境启用：线上是公网服务，不该对外公开接口文档。
 // 文档由内置的 Microsoft.AspNetCore.OpenApi 生成在 /openapi/v1.json，UI 由 Swashbuckle 提供，入口 /swagger

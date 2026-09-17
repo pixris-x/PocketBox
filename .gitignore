@@ -4,6 +4,8 @@ node_modules/
 # 构建产物
 dist/
 dist-ssr/
+# Electron 打包产物（electron-builder 输出）
+release/
 
 # .NET 构建产物（限定在 backend/ 内，避免误伤同名目录）
 backend/**/bin/
