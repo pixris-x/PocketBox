@@ -19,6 +19,7 @@ import UiIcon from './UiIcon/index.vue'
 import UiSection from './UiSection/index.vue'
 import UiDivider from './UiDivider/index.vue'
 import UiToast from './UiToast/index.vue'
+import UiDropzone from './UiDropzone/index.vue'
 
 const COMPONENTS = {
   UiButton,
@@ -35,6 +36,7 @@ const COMPONENTS = {
   UiSection,
   UiDivider,
   UiToast,
+  UiDropzone,
 }
 
 export const UiLibrary = {
@@ -60,4 +62,5 @@ export {
   UiSection,
   UiDivider,
   UiToast,
+  UiDropzone,
 }
