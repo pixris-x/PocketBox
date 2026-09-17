@@ -6,32 +6,43 @@
 
 ## 功能
 
-| 工具            | 说明                                                                    |
-| --------------- | ----------------------------------------------------------------------- |
-| 随机强密码生成  | Web Crypto 真随机，长度 / 字符集 / 排除易混淆字符 / 批量生成            |
-| 图片格式转换    | PNG / JPEG / WebP 互转，质量与缩放调节，Canvas 实现                     |
-| Base64 转换     | 文本（Unicode 安全）与文件的编解码                                      |
-| MD5 哈希        | 文本与文件的 MD5 摘要，附安全提示                                       |
-| JavaScript 压缩 | terser 在 Web Worker 中运行，压缩 / 混淆开关，大小对比                  |
-| JSON 工具       | 格式化 / 压缩 / 校验；层级树视图带类型着色、路径定位与节点复制          |
-| URL 编码 / 解码 | 组件编码 / 解码，兼容查询串 `+` 号                                      |
-| 时间戳转换      | 秒 / 毫秒 ↔ 日期，本地 / UTC / ISO                                      |
-| UUID 生成       | 批量生成 UUID v4                                                        |
-| 二维码生成      | 文本与链接转二维码，可调纠错级别并导出 PNG                              |
-| 文本 diff 对比  | 逐行对比两段文本，标出新增与删除的行                                    |
-| 正则测试        | 实时查看正则匹配结果、捕获分组与替换效果                                |
-| 颜色格式转换    | HEX / RGB / HSL 互转，附对比度与可读性参考                              |
-| 文本批处理      | 批量去空白 / 去空行 / 去重 / 排序 / 大小写转换，附字数行数统计          |
-| 空白符清理      | 压缩连续空格与制表符、清理全角空格与 NBSP、删空行或合并单行             |
-| 命名风格转换    | 拆词后在 camelCase、snake_case 等 8 种命名风格间互转                    |
-| 单位换算        | 长度 / 重量 / 面积 / 体积 / 数据存储 / 温度，一次列全同分类单位         |
-| CSV ↔ JSON 互转 | 表格与 JSON 双向转换，支持引号转义与自定义分隔符                        |
-| JWT 解析        | 本地解码 Header / Payload 与有效期，令牌不外发                          |
-| SHA 哈希        | SHA-1 / 256 / 384 / 512 摘要，文本与文件均可，用于完整性校验            |
-| AES 加解密      | AES-GCM 文本加解密，PBKDF2 口令派生密钥，数据与口令不出浏览器           |
-| 进制转换        | 2/8/10/16 与任意 2-36 进制互转，整数走 BigInt 不丢精度                  |
-| IP 工具         | CIDR 子网计算与同子网判定（本地）；IP 归属地查询与我的公网 IP（服务端） |
-| 日期计算器      | 两日期之差（年/月/日 + 总天数）与日期加减，含工作日 / 跨月跨年          |
+| 工具                    | 说明                                                                    |
+| ----------------------- | ----------------------------------------------------------------------- |
+| 随机强密码生成          | Web Crypto 真随机，长度 / 字符集 / 排除易混淆字符 / 批量生成            |
+| 图片格式转换            | PNG / JPEG / WebP 互转，质量与缩放调节，Canvas 实现                     |
+| Base64 转换             | 文本（Unicode 安全）与文件的编解码                                      |
+| MD5 哈希                | 文本与文件的 MD5 摘要，附安全提示                                       |
+| JavaScript 压缩         | terser 在 Web Worker 中运行，压缩 / 混淆开关，大小对比                  |
+| JSON 工具               | 格式化 / 压缩 / 校验；层级树视图带类型着色、路径定位与节点复制          |
+| URL 编码 / 解码         | 组件编码 / 解码，兼容查询串 `+` 号                                      |
+| 时间戳转换              | 秒 / 毫秒 ↔ 日期，本地 / UTC / ISO                                      |
+| UUID 生成               | 批量生成 UUID v4                                                        |
+| 二维码生成              | 文本与链接转二维码，可调纠错级别并导出 PNG                              |
+| 文本 diff 对比          | 逐行对比两段文本，标出新增与删除的行                                    |
+| 正则测试                | 实时查看正则匹配结果、捕获分组与替换效果                                |
+| 颜色格式转换            | HEX / RGB / HSL 互转，附对比度与可读性参考                              |
+| 文本批处理              | 批量去空白 / 去空行 / 去重 / 排序 / 大小写转换，附字数行数统计          |
+| 空白符清理              | 压缩连续空格与制表符、清理全角空格与 NBSP、删空行或合并单行             |
+| EXIF 查看器             | 本地读取照片设备 / 拍摄参数 / GPS 位置，一键清除元数据导出副本          |
+| Cron 表达式解析         | 拆解 5 段 Cron 字段含义并预测未来执行，支持宏与英文月 / 周名            |
+| 二维码识别              | 图片中的二维码还原为文本 / 链接 / WiFi 密码，本地解码不上传             |
+| URL 参数解析            | URL / 查询串拆成键值表，自动解码，支持重新编码输出                      |
+| XML ↔ JSON 互转         | 属性转 @键、重复元素转数组，双向转换零依赖                              |
+| HTTP 状态码 / MIME 速查 | 状态码与 Content-Type 对照表，按关键词过滤                              |
+| Unicode 字符查询        | 逐码点看 UTF-8 字节 / HTML 实体 / JS 转义，支持反向还原                 |
+| Markdown 表格           | CSV 转 Markdown 表格，支持对齐方式与自定义分隔符                        |
+| 中文假文生成            | 生成中文占位文本用于原型与测试数据填充，Web Crypto 真随机               |
+| Favicon 生成            | 一张图导出全尺寸 PNG 并打包 favicon.ico，cover 式居中裁剪               |
+| PDF 合并 / 拆分         | 多个 PDF 合并或按页码区间提取页面，pdf-lib 本地处理不上传               |
+| 命名风格转换            | 拆词后在 camelCase、snake_case 等 8 种命名风格间互转                    |
+| 单位换算                | 长度 / 重量 / 面积 / 体积 / 数据存储 / 温度，一次列全同分类单位         |
+| CSV ↔ JSON 互转         | 表格与 JSON 双向转换，支持引号转义与自定义分隔符                        |
+| JWT 解析                | 本地解码 Header / Payload 与有效期，令牌不外发                          |
+| SHA 哈希                | SHA-1 / 256 / 384 / 512 摘要，文本与文件均可，用于完整性校验            |
+| AES 加解密              | AES-GCM 文本加解密，PBKDF2 口令派生密钥，数据与口令不出浏览器           |
+| 进制转换                | 2/8/10/16 与任意 2-36 进制互转，整数走 BigInt 不丢精度                  |
+| IP 工具                 | CIDR 子网计算与同子网判定（本地）；IP 归属地查询与我的公网 IP（服务端） |
+| 日期计算器              | 两日期之差（年/月/日 + 总天数）与日期加减，含工作日 / 跨月跨年          |
 
 > 首页支持按关键词搜索（匹配标题 / 描述 / id / 标签）与按分类筛选，分类定义见
 > `src/data/tools.js` 导出的 `categories`。
@@ -72,7 +83,7 @@ pocketBox/
 ├─ src/
 │  ├─ common/                  # 公共统一目录
 │  │  ├─ styles/               #   设计 token（明暗 × 配色两个维度）、mixins、base
-│  │  ├─ utils/                #   公共函数（base64/md5/sha/aes/json/JSON 树/url/时间戳/CSV/JWT/文本处理/空白清理/命名/进制/IP子网/日期/Service Worker 更新检测…）
+│  │  ├─ utils/                #   公共函数（base64/md5/sha/aes/json/JSON 树/url/查询串/时间戳/CSV/JWT/文本处理/空白清理/EXIF/Cron/Unicode/Markdown表格/XML↔JSON/命名/进制/IP子网/日期/Service Worker 更新检测…）
 │  │  └─ components/           #   自研 UI 组件库（UiButton/UiInput/UiSlider/…）
 │  ├─ router/                  # 路由（由 data/tools.js 自动生成）
 │  ├─ data/tools.js            # 工具元数据（首页网格 + 分类筛选 + 路由的唯一数据源）
@@ -119,7 +130,7 @@ pocketBox/
 
 ```
 tests/
-├─ utils/          # 公共纯函数，按模块一一对应（18 个 spec）
+├─ utils/          # 公共纯函数，按模块一一对应（27 个 spec）
 └─ tools/          # 页面私有算法（如单位换算的数据表 scripts/units.js）
 ```
 
@@ -334,20 +345,39 @@ docker rm -f pocketbox          # 停止并移除
 
 > 注意：History 路由 + 绝对 base 意味着**不能用 `file://` 直接打开** `dist/index.html`，必须经由 HTTP 服务器。JavaScript 压缩工具使用 Web Worker，同样需要 HTTP 环境。开发时 `pnpm dev` 自带 fallback，无需额外配置。
 
+## 桌面端（Electron）
+
+Electron 封装是可选分发渠道，Web 版构建与部署完全不受影响：
+
+```bash
+pnpm install        # electron 相关依赖已登记在 devDependencies
+pnpm electron:dev   # 开发：Vite dev server + Electron，IP 接口走 vite proxy（需本地后端 5048）
+pnpm electron:build # 打包：注入 VITE_API_BASE → vite build → electron-builder，Windows 安装包输出到 release/
+```
+
+- **加载方式**：生产模式由主进程注册 `app://pocketbox` 自定义协议托管 `dist/`，History 路由无需改成 hash 模式
+- **IP 归属地**：复用线上 API（后端 CORS 白名单仅 `app://pocketbox`），数据口径与 Web 端一致；23 个纯本地工具零改动
+- **Service Worker**：桌面环境自动跳过（`electron/preload.cjs` 暴露标识），版本更新将来走 electron-updater
+- 未做代码签名时 Windows SmartScreen 会告警，属正常现象
+
 ## 依赖登记
 
 ### 前端依赖（npm）
 
-| 包                 | 版本  | 用途                                                          |
-| ------------------ | ----- | ------------------------------------------------------------- |
-| vue                | ^3.5  | 框架                                                          |
-| vue-router         | ^4.5  | 路由                                                          |
-| js-md5             | ^0.8  | MD5 摘要                                                      |
-| qrcode-generator   | ^2.0  | 二维码矩阵计算（纯计算、无子依赖；Canvas 渲染与导出自行实现） |
-| terser             | ^5.36 | JavaScript 压缩（Vite `?worker` 打包，Worker 中运行）         |
-| vite               | ^7    | 构建                                                          |
-| @vitejs/plugin-vue | ^6    | Vue SFC 编译                                                  |
-| sass               | ^1.80 | SCSS 编译                                                     |
+| 包                 | 版本   | 用途                                                          |
+| ------------------ | ------ | ------------------------------------------------------------- |
+| vue                | ^3.5   | 框架                                                          |
+| vue-router         | ^4.5   | 路由                                                          |
+| js-md5             | ^0.8   | MD5 摘要                                                      |
+| qrcode-generator   | ^2.0   | 二维码矩阵计算（纯计算、无子依赖；Canvas 渲染与导出自行实现） |
+| jsqr               | ^1.4   | 二维码识别（纯解码库，从图片像素解出文本，本地运行）          |
+| pdf-lib            | ^1.17  | PDF 合并 / 拆分（纯 JS 读写，本地运行，不依赖服务端）         |
+| terser             | ^5.36  | JavaScript 压缩（Vite `?worker` 打包，Worker 中运行）         |
+| vite               | ^7     | 构建                                                          |
+| @vitejs/plugin-vue | ^6     | Vue SFC 编译                                                  |
+| sass               | ^1.80  | SCSS 编译                                                     |
+| electron           | ^44.4  | 桌面端运行时（devDependencies，仅 Electron 构建用）           |
+| electron-builder   | ^26.15 | 桌面端打包（devDependencies，仅 Electron 构建用）             |
 
 ### 后端依赖（NuGet）
 

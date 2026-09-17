@@ -112,6 +112,9 @@ backend/                 # ★ .NET 10 后端（只放需要服务端才能做�
 - 工具的**计算**在浏览器本地完成，**数据不外发给第三方**。这是站点的核心卖点，任何改动都不得削弱它。
 - 当前唯一经由服务端的能力是 IP 相关接口（归属地查询、访客 IP 探测），走的是**本站自己的服务**，不经过第三方。
   因此站内文案统一为「计算在浏览器本地完成，数据不外发给第三方（IP 归属地由本站服务端查询）」。
+- **桌面端（Electron）**：页面由 `app://pocketbox` 协议本地托管，23 个纯本地工具照旧零外发；
+  IP 归属地仍查**同一个本站服务端**（构建时注入 `VITE_API_BASE`，后端 CORS 白名单仅 `app://pocketbox`），
+  口径与 Web 一致，无需改上述 5 处文案。桌面端更新走 electron-updater（SW 在桌面环境自动跳过）。
 - **新增任何其他外发请求或服务端能力前，必须先回头修改本节**，并同步 `Home/index.vue`、`AppFooter/index.vue`、
   `index.html`（meta description）、`public/manifest.webmanifest`、`README.md` 的隐私表述，
   避免宣传口径与实际行为冲突。
