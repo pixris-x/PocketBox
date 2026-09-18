@@ -163,9 +163,18 @@ scripts/                 # 构建辅助脚本（Node ESM，非站点代码）
   IP 归属地仍查**同一个本站服务端**（构建时注入 `VITE_API_BASE`，后端 CORS 白名单仅 `app://pocketbox`）。
   ⚠ **桌面端唯一的第三方外发是自动更新**：打包后 `electron/main.cjs` 的 electron-updater 会向
   **GitHub**（`api.github.com` + Releases 资产域名）拉 `latest.yml` 与安装包，更新源登记在
-  `package.json` 的 `build.publish`（owner `pixris-x` / repo `pocketBox`）。该请求只含应用版本与
+  `package.json` 的 `build.publish`（owner `pixris-x` / repo `PocketBox`，注意仓库名大小写）。该请求只含应用版本与
   系统架构，不带任何用户内容；SW 在桌面环境仍自动跳过（Web 版继续走 SW 更新）。
   发布走 `pnpm electron:release`（需 `GH_TOKEN`），`pnpm electron:build` 只本机出包、不会误推版本。
+  ⚠ **已知未解决的限制：桌面端自动更新目前对外不可用。** `pixris-x/PocketBox` 是 **private** 仓库，
+  而 electron-updater 在客户端发起的是**匿名**请求 —— 私有仓库的 Releases API 与资产下载 URL 都要鉴权，
+  未授权一律 404。`GH_TOKEN` 只解决「发布者上传」，解决不了「客户端拉取」。
+  因此**禁止给 `build.publish` 配 token**：那等于把私有仓库的读权限打进分发的安装包交出去。
+  当前状态下桌面端升级实际靠手动重装（去 Releases 页面下 exe），代码与配置齐备但对外等于没有。
+  真要启用，三选一后再动 `build.publish`：① 仓库转 public；② 改 `provider: 'generic'`
+  指本站 `https://pocketbox.pixris.online/desktop/`（可写在 `#SERVER-BLOCK` 安全区内，隐私口径也更干净）；
+  ③ 另建一个只放 Release 资产的 public 仓库、`publish.owner/repo` 指过去。
+  另外仓库从未发布过任何 Release，整条链路一次都没真跑通过。
   因为这条外发只存在于桌面端，Web 站的 4 处文案（`Home/index.vue`、`index.html`、
   `manifest.webmanifest`、`README.md` 开头）**保持原样仍然准确**；
   `AppFooter` 则按 `window.pocketbox.desktop` 标识为桌面端追加一句更新源说明，避免口径与实际行为冲突。

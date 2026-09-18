@@ -65,7 +65,7 @@ function registerAppProtocol() {
 }
 
 /**
- * 自动更新：更新源是 GitHub Releases（pixris-x/pocketBox），配置见 package.json 的 build.publish。
+ * 自动更新：更新源是 GitHub Releases（pixris-x/PocketBox），配置见 package.json 的 build.publish。
  * 只在打包后的环境启用 —— 开发模式不会生成 resources/app-update.yml，
  * electron-updater 读不到它会在启动检查时抛错。换更新源要同步改 AGENTS.md §7.1 的隐私口径。
  */

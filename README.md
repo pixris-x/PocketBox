@@ -374,13 +374,23 @@ GH_TOKEN=... pnpm electron:release  # 打包并发布到 GitHub Releases（桌�
 
 - **加载方式**：生产模式由主进程注册 `app://pocketbox` 自定义协议托管 `dist/`，History 路由无需改成 hash 模式
 - **IP 归属地**：复用线上 API（后端 CORS 白名单仅 `app://pocketbox`），数据口径与 Web 端一致；23 个纯本地工具零改动
-- **自动更新**：打包后 `electron/main.cjs` 用 electron-updater 检查 **GitHub Releases**（`pixris-x/pocketBox`，
+- **自动更新**：打包后 `electron/main.cjs` 用 electron-updater 检查 **GitHub Releases**（`pixris-x/PocketBox`，
   源配置在 `package.json` 的 `build.publish`）。发现新版即后台下载，下次退出应用时完成安装。
   这是桌面端唯一的第三方外发，只携带版本号与系统架构，不含用户数据；Web 版仍走 SW 更新，不受影响
 - **发布流程**：改 `package.json` 的 `version` → `pnpm electron:release`。安装包名固定为
   `PocketBox-Setup-<version>.exe`（无空格，避免 `latest.yml` 与实际资产名不一致导致更新 404）
 - **Service Worker**：桌面环境自动跳过（`electron/preload.cjs` 暴露标识，判定收在 `common/utils/desktop.js`），更新一律走上面的 electron-updater
 - 未做代码签名时 Windows SmartScreen 会告警，属正常现象
+
+> ⚠ **上面这条自动更新目前对外不可用，代码已就绪但客户端拿不到更新。**
+> 原因：`pixris-x/PocketBox` 是 **private** 仓库，而 electron-updater 在用户机器上发起的是匿名请求，
+> 私有仓库的 Releases API 与资产下载地址都需要鉴权，未授权一律 404。
+> `GH_TOKEN` 只让「发布」成立，解决不了「客户端拉取」；**绝不能把 token 配进 `build.publish`**，
+> 那等于把私有仓库的读权限打进分发的安装包交出去。
+> 现状下的升级方式：去 Releases 页面手动下载 exe 重装。
+> 要真正启用，三选一（详见 AGENTS.md §7.1）：仓库转 public / `provider` 改为 `generic` 指本站
+> `https://pocketbox.pixris.online/desktop/` / 另建一个只放 Release 资产的 public 仓库。
+> 另注：仓库至今没有发布过任何 Release，这条链路一次都没真跑通过。
 
 ## 依赖登记
 
