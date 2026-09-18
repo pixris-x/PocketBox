@@ -18,9 +18,11 @@
     "test:watch": "vitest",
     "electron:dev": "node scripts/electron-dev.mjs",
     "electron:build": "node scripts/electron-build.mjs",
+    "electron:release": "node scripts/electron-build.mjs --publish",
     "gate": "pnpm run lint && pnpm run format:check && pnpm run test"
   },
   "dependencies": {
+    "electron-updater": "^6.8.9",
     "js-md5": "^0.8.3",
     "js-yaml": "^5.4.2",
     "jsqr": "^1.4.0",
@@ -54,8 +56,18 @@
     "directories": {
       "output": "release"
     },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "pixris-x",
+        "repo": "pocketBox"
+      }
+    ],
     "win": {
       "target": "nsis"
+    },
+    "nsis": {
+      "artifactName": "PocketBox-Setup-${version}.${ext}"
     }
   },
   "pnpm": {

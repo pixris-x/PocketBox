@@ -100,13 +100,14 @@ pocketBox/
 │     └─ Contracts/            #   请求 / 响应模型
 ├─ deploy/                     # 部署相关
 │  ├─ server.js                #   容器内零依赖 Node 静态服务器（SPA fallback + ETag 协商缓存）
-│  ├─ nginx.conf               #   宿主机 nginx 反代示例（upstream 用 127.0.0.1:映射端口）
-│  └─ nginx.docker.conf        #   compose 内 nginx 容器用（upstream 用服务名 web / api）
+│  ├─ nginx.bt.conf            #   ★ 线上唯一生效配置的仓库副本（宝塔托管的宿主机 nginx）
+│  ├─ nginx.docker.conf        #   compose 内 nginx 容器用（upstream 用服务名 web / api）
+│  └─ nginx.conf               #   无面板环境的宿主机 nginx 参考模板（当前未部署）
 ├─ public/                     # 静态资产（favicon / apple-touch-icon / logo.svg /
 │                              #   manifest.webmanifest / sw.js / PWA 图标）
 ├─ tests/                      # 单元测试（utils/ 公共纯函数、tools/ 页面私有算法）
 ├─ Dockerfile                  # 前端两阶段构建，运行阶段只含 dist + server.js
-└─ docker-compose.yml          # web（8701:3000）+ api（8702:8080）+ nginx（8080:80，仅 local profile）
+└─ docker-compose.yml          # web（127.0.0.1:8701:3000）+ api（127.0.0.1:8702:8080）+ nginx（8080:80，仅 local profile）
 ```
 
 ## 新增一个工具
@@ -199,12 +200,17 @@ VS 与 `dotnet run` 默认就是开发环境，`launchSettings.json` 已把启�
 ## 部署
 
 本项目采用**自托管**方式：在同一台机器上用 Docker 跑静态容器与 API 容器，由宿主机 nginx 反向代理对外服务。
+宿主机的 nginx 由**宝塔面板**托管，其线上实配记录在 `deploy/nginx.bt.conf`。
 
 ```
-浏览器 → 宿主机 nginx（80/443，gzip + 安全头 + HTTPS）
+浏览器 → 宿主机 nginx（宝塔，80/443，TLS + 分流 + 安全头）  ← 实配见 deploy/nginx.bt.conf
            ├─ /api/     → proxy_pass 127.0.0.1:8702 → API 容器（.NET，IP 归属地 / 访客 IP）
            └─ 其余路径  → proxy_pass 127.0.0.1:8701 → 静态容器（Node，dist/ + SPA fallback）
 ```
+
+> ⚠ **`deploy/nginx.conf` 不是线上实配**，只是无面板环境的参考模板。审计安全性、改分流或加响应头时，
+> 必须对着 `nginx.bt.conf` 判断，否则会得出「仓库写了但线上没生效」的错误结论（已经踩过一次）。
+> 三份配置的完整职责划分见 [AGENTS.md](./AGENTS.md) §7。
 
 ### 本机验证（compose 内置 nginx，宿主机无需装 nginx）
 
@@ -222,8 +228,9 @@ docker compose --profile local up -d --build
   白占 8080。所以给它加了 `profiles: ['local']`，线上直接 `docker compose up -d` 时会自动跳过。
 - 入口用 **8080** 而不是 80：宿主机 80 常被 Windows 的 HTTP.sys 占用。改 `docker-compose.yml` 里
   `'8080:80'` 左侧数字即可换端口。
-- 它挂载的是 **`deploy/nginx.docker.conf`** —— upstream 写的是 compose 服务名（`web` / `api`）；
-  而给宿主机 nginx 用的 `deploy/nginx.conf` 写的是 `127.0.0.1:映射端口`。**这两份配置不能混用。**
+- 它挂载的是 **`deploy/nginx.docker.conf`** —— upstream 写的是 compose 服务名（`web` / `api`），
+  只能给容器里的 nginx 用；宿主机侧的另外两份（线上实配 `nginx.bt.conf`、参考模板 `nginx.conf`）
+  写的是 `127.0.0.1:映射端口`。**三份不能混用。**
 - 本机访问时「我的 IP」会显示容器网关地址（形如 `172.18.0.1`）而不是真实公网 IP —— 本机环境拿不到
   自己的公网出口地址，属正常现象；线上经真实 nginx 反代时会正确显示访客地址。
 
@@ -235,9 +242,19 @@ docker compose logs -f         # 查看日志（加服务名可只看一个：lo
 docker compose down            # 停止并移除容器
 ```
 
-1. `web` 映射到宿主机 **8701**、`api` 映射到 **8702**（改 `docker-compose.yml` 里 `ports` 左侧数字即可换端口）；
-2. 把 `deploy/nginx.conf` 放进宿主机 nginx（改 `server_name` 与两个 `proxy_pass` 端口），`nginx -s reload`；
-3. HTTPS 建议 `certbot --nginx -d your.domain.com` 一键生成。
+1. `web` 映射到宿主机 **8701**、`api` 映射到 **8702**，两个端口都**只绑回环**（`127.0.0.1:` 前缀），公网入口一律走宿主机 nginx；
+   换端口改 `ports` 的**中间**一段数字，**不要删掉 `127.0.0.1:` 前缀** —— 删了等于把 API 直接挂到公网，
+   而 `/api/ip` 信任 `X-Real-IP` / `X-Forwarded-For`，届时任何人都能伪造来源地址（覆盖这两个头的是 nginx，不是容器）；
+2. 宿主机 nginx 配 `/api/` 分流，按你的环境二选一：
+   - **宝塔（线上现状）**：站点先设为反代到 `http://127.0.0.1:8701`，再在「配置文件」的
+     `#SERVER-BLOCK START/END` 段内补上 `location ^~ /api/` 指向 `127.0.0.1:8702` ——
+     整段可直接照抄 `deploy/nginx.bt.conf`。只有这一段面板不会覆盖，自定义务必写在这里；
+     用面板 UI 改的项（证书、强制 HTTPS、TLS 协议版本）改完要把结果**回填进该副本**。
+   - **无面板**：把 `deploy/nginx.conf` 放进 `sites-enabled/`（改 `server_name` 与两个 `proxy_pass` 端口），
+     HTTPS 用 `certbot --nginx -d your.domain.com` 一键补齐。
+     两种方式都必须先 `nginx -t` 通过再 reload —— 本机没有 nginx 与 Docker，这一步只能在服务器上验。
+3. 验证分流与来源 IP 传递：`curl -s https://<域名>/api/ip` 应返回你的公网出口地址；
+   若返回 `172.x` 之类的容器网关地址，说明 `X-Real-IP` 没有正确传递，反代头需要回查。
 
 宿主机无需安装 Node 或 .NET SDK —— 前端构建与后端发布都在容器构建阶段完成。
 
@@ -253,7 +270,8 @@ docker compose down            # 停止并移除容器
 <details>
 <summary>接入已有的 nginx（含宝塔面板）：<code>location /api/</code> 怎么加</summary>
 
-`deploy/nginx.conf` 是**独立示例**；真实环境往往已经有自己的站点配置（证书路径、其他站点、面板模板）。
+`deploy/nginx.conf` 是**无面板环境的参考模板**（本站线上实配记录在 `deploy/nginx.bt.conf`）；
+真实环境往往已经有自己的站点配置（证书路径、其他站点、面板模板）。
 此时**不要整份替换**，只补下面这一段分流即可，其余保持不动：
 
 ```nginx
@@ -276,6 +294,11 @@ location ^~ /api/ {
 面板会把它写进 `/www/server/panel/vhost/nginx/extension/<域名>/`，再由主配置里的 `include` 引入；
 好处是面板重新生成主配置时不会把它冲掉，比直接改主配置文件更稳。
 
+> 宝塔有两个「面板不会覆盖」的落点：主配置里的 `#SERVER-BLOCK START/END` 段，以及上面说的 `extension/` 目录。
+> 本站线上目前用的是前者（`/api/` 直接写在主配置的 SERVER-BLOCK 段内，与 `deploy/nginx.bt.conf` 一致）。
+> 无论用哪一个，`extension/*.conf` 的内容都**不在主配置文件里**，排障时容易漏看；
+> 只要往那里挪了东西，就要同步回填 `nginx.bt.conf`，否则仓库副本又变成假的实配。
+
 验证（两条都该返回 JSON，而不是 HTML）：
 
 ```bash
@@ -291,11 +314,11 @@ curl -i 'https://<域名>/api/ip/region?ip=114.114.114.114'
 ```bash
 # 静态容器
 docker build -t pocketbox:latest .
-docker run -d --name pocketbox --restart unless-stopped -p 8701:3000 pocketbox:latest
+docker run -d --name pocketbox --restart unless-stopped -p 127.0.0.1:8701:3000 pocketbox:latest
 
 # API 容器（构建上下文是 backend/）
 docker build -t pocketbox-api:latest ./backend
-docker run -d --name pocketbox-api --restart unless-stopped -p 8702:8080 pocketbox-api:latest
+docker run -d --name pocketbox-api --restart unless-stopped -p 127.0.0.1:8702:8080 pocketbox-api:latest
 
 docker logs -f pocketbox        # 查看日志
 docker rm -f pocketbox          # 停止并移除
@@ -343,36 +366,47 @@ docker rm -f pocketbox          # 停止并移除
 Electron 封装是可选分发渠道，Web 版构建与部署完全不受影响：
 
 ```bash
-pnpm install        # electron 相关依赖已登记在 devDependencies
-pnpm electron:dev   # 开发：Vite dev server + Electron，IP 接口走 vite proxy（需本地后端 5048）
-pnpm electron:build # 打包：注入 VITE_API_BASE → vite build → electron-builder，Windows 安装包输出到 release/
+pnpm install         # electron / electron-builder 在 devDependencies，electron-updater 在 dependencies
+pnpm electron:dev    # 开发：Vite dev server + Electron，IP 接口走 vite proxy（需本地后端 5048）
+pnpm electron:build  # 打包：注入 VITE_API_BASE → vite build → electron-builder，Windows 安装包输出到 release/
+GH_TOKEN=... pnpm electron:release  # 打包并发布到 GitHub Releases（桌面端的更新源）
 ```
 
 - **加载方式**：生产模式由主进程注册 `app://pocketbox` 自定义协议托管 `dist/`，History 路由无需改成 hash 模式
 - **IP 归属地**：复用线上 API（后端 CORS 白名单仅 `app://pocketbox`），数据口径与 Web 端一致；23 个纯本地工具零改动
-- **Service Worker**：桌面环境自动跳过（`electron/preload.cjs` 暴露标识），版本更新将来走 electron-updater
+- **自动更新**：打包后 `electron/main.cjs` 用 electron-updater 检查 **GitHub Releases**（`pixris-x/pocketBox`，
+  源配置在 `package.json` 的 `build.publish`）。发现新版即后台下载，下次退出应用时完成安装。
+  这是桌面端唯一的第三方外发，只携带版本号与系统架构，不含用户数据；Web 版仍走 SW 更新，不受影响
+- **发布流程**：改 `package.json` 的 `version` → `pnpm electron:release`。安装包名固定为
+  `PocketBox-Setup-<version>.exe`（无空格，避免 `latest.yml` 与实际资产名不一致导致更新 404）
+- **Service Worker**：桌面环境自动跳过（`electron/preload.cjs` 暴露标识，判定收在 `common/utils/desktop.js`），更新一律走上面的 electron-updater
 - 未做代码签名时 Windows SmartScreen 会告警，属正常现象
 
 ## 依赖登记
 
 ### 前端依赖（npm）
 
-| 包                 | 版本   | 用途                                                          |
-| ------------------ | ------ | ------------------------------------------------------------- |
-| vue                | ^3.5   | 框架                                                          |
-| vue-router         | ^4.5   | 路由                                                          |
-| js-md5             | ^0.8   | MD5 摘要                                                      |
-| qrcode-generator   | ^2.0   | 二维码矩阵计算（纯计算、无子依赖；Canvas 渲染与导出自行实现） |
-| jsqr               | ^1.4   | 二维码识别（纯解码库，从图片像素解出文本，本地运行）          |
-| pdf-lib            | ^1.17  | PDF 合并 / 拆分（纯 JS 读写，本地运行，不依赖服务端）         |
-| js-yaml            | ^5.4   | YAML ↔ JSON 互转（纯 ESM 命名导出，本地解析）                 |
-| marked             | ^18    | Markdown 渲染（输出放 sandbox iframe 中预览）                 |
-| terser             | ^5.36  | JavaScript 压缩（Vite `?worker` 打包，Worker 中运行）         |
-| vite               | ^7     | 构建                                                          |
-| @vitejs/plugin-vue | ^6     | Vue SFC 编译                                                  |
-| sass               | ^1.80  | SCSS 编译                                                     |
-| electron           | ^44.4  | 桌面端运行时（devDependencies，仅 Electron 构建用）           |
-| electron-builder   | ^26.15 | 桌面端打包（devDependencies，仅 Electron 构建用）             |
+| 包                 | 版本   | 用途                                                                          |
+| ------------------ | ------ | ----------------------------------------------------------------------------- |
+| vue                | ^3.5   | 框架                                                                          |
+| vue-router         | ^4.5   | 路由                                                                          |
+| js-md5             | ^0.8   | MD5 摘要                                                                      |
+| qrcode-generator   | ^2.0   | 二维码矩阵计算（纯计算、无子依赖；Canvas 渲染与导出自行实现）                 |
+| jsqr               | ^1.4   | 二维码识别（纯解码库，从图片像素解出文本，本地运行）                          |
+| pdf-lib            | ^1.17  | PDF 合并 / 拆分（纯 JS 读写，本地运行，不依赖服务端）                         |
+| js-yaml            | ^5.4   | YAML ↔ JSON 互转（纯 ESM 命名导出，本地解析）                                 |
+| marked             | ^18    | Markdown 渲染（输出放 sandbox iframe 中预览）                                 |
+| terser             | ^5.36  | JavaScript 压缩（Vite `?worker` 打包，Worker 中运行）                         |
+| vite               | ^7     | 构建                                                                          |
+| @vitejs/plugin-vue | ^6     | Vue SFC 编译                                                                  |
+| sass               | ^1.80  | SCSS 编译                                                                     |
+| electron           | ^44.4  | 桌面端运行时（devDependencies，仅 Electron 构建用）                           |
+| electron-builder   | ^26.15 | 桌面端打包（devDependencies，仅 Electron 构建用）                             |
+| electron-updater   | ^6.8   | 桌面端自动更新（**dependencies**：要被打包进 app.asar，主进程运行时 require） |
+
+> `electron-updater` 放在 `dependencies` 而非 `devDependencies` 是有意的：electron-builder
+> 只把生产依赖复制进安装包，放错位置会导致打包后的应用 `require` 失败。
+> 它只被 `electron/main.cjs` 引用，不进 Web 端产物。
 
 ### 后端依赖（NuGet）
 

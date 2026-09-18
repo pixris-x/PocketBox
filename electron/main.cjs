@@ -4,6 +4,7 @@
 //   - 生产：注册 app:// 自定义协议（standard + secure），由本进程托管 dist/
 //     History 路由、动态 import 与 fetch 均原样工作，无需改成 hash 模式
 //   - 安全：contextIsolation + sandbox，渲染层没有 Node 能力
+//   - 更新：仅打包环境启用 electron-updater，拉 GitHub Releases（见 build.publish）
 // ============================================================
 const { app, BrowserWindow, protocol } = require('electron')
 const path = require('node:path')
@@ -63,6 +64,24 @@ function registerAppProtocol() {
   })
 }
 
+/**
+ * 自动更新：更新源是 GitHub Releases（pixris-x/pocketBox），配置见 package.json 的 build.publish。
+ * 只在打包后的环境启用 —— 开发模式不会生成 resources/app-update.yml，
+ * electron-updater 读不到它会在启动检查时抛错。换更新源要同步改 AGENTS.md §7.1 的隐私口径。
+ */
+function initAutoUpdater() {
+  if (!app.isPackaged) return
+
+  const { autoUpdater } = require('electron-updater')
+  // 下载完成后不强制重启，等用户下次退出应用时装好
+  autoUpdater.autoInstallOnAppQuit = true
+  autoUpdater.on('error', (error) => {
+    // 离线 / GitHub 不可达只影响更新，不打扰用户
+    console.warn('[updater] 自动更新失败：', error?.message || error)
+  })
+  autoUpdater.checkForUpdatesAndNotify().catch(() => {})
+}
+
 function createWindow() {
   const win = new BrowserWindow({
     width: 1100,
@@ -91,6 +110,7 @@ app.whenReady().then(() => {
     registerAppProtocol()
   }
   createWindow()
+  initAutoUpdater()
 
   app.on('activate', () => {
     // macOS 关闭窗口后点 dock 图标重建窗口

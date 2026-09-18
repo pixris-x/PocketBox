@@ -6,16 +6,15 @@
 // 可靠的信号是 navigator.serviceWorker 的 controllerchange 事件。
 // ============================================================
 import { ref } from 'vue'
+import { isDesktop } from '@/common/utils/desktop'
 
 /** 已有新版本接管页面，但当前页面仍在跑旧代码，需要刷新才能用上 */
 export const updateReady = ref(false)
 
-/** 桌面端（Electron）由主进程直接托管 dist，更新走 electron-updater，不用 SW */
-function isDesktop() {
-  return window.pocketbox?.desktop === true || /Electron\//.test(navigator.userAgent || '')
-}
-
-/** 注册 Service Worker 并监听更新（仅在调用方确认是生产环境后使用） */
+/**
+ * 注册 Service Worker 并监听更新（仅在调用方确认是生产环境后使用）。
+ * 桌面端（Electron）由主进程直接托管 dist、更新走 electron-updater，这里直接跳过。
+ */
 export function registerServiceWorker() {
   if (!('serviceWorker' in navigator)) return
   if (isDesktop()) return

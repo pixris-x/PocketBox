@@ -49,12 +49,13 @@ backend/                 # ★ .NET 10 后端（只放需要服务端才能做�
 
 ```
 electron/                # ★ 桌面端（Electron）外壳，仅生产构建使用
-├─ main.cjs             #   主进程：app:// 协议托管 dist/ + 窗口生命周期
+├─ main.cjs             #   主进程：app:// 协议托管 dist/ + 窗口生命周期 + electron-updater
 └─ preload.cjs          #   预加载：仅暴露 window.pocketbox.desktop 标识（contextIsolation + sandbox）
 
 scripts/                 # 构建辅助脚本（Node ESM，非站点代码）
 ├─ electron-dev.mjs     #   编程式起 Vite dev server + spawn Electron
 └─ electron-build.mjs   #   注入 VITE_API_BASE → vite build → electron-builder
+                        #   --publish 时才推 GitHub Releases（需 GH_TOKEN），见 §7.1
 ```
 
 ### 2.1 归属原则（重要）
@@ -126,11 +127,32 @@ scripts/                 # 构建辅助脚本（Node ESM，非站点代码）
   线上是公网服务，不对外公开接口文档。
 - **部署**：`docker-compose.yml` 有 `web`（静态）、`api`（.NET）、`nginx`（统一入口）三个服务；
   nginx 把 `/api/` 整段转发给 api，静态容器不再处理任何接口。
+  ⚠ **`web` / `api` 的宿主机端口必须保留 `127.0.0.1:` 前缀**（现 `8701` / `8702` 只绑回环）：
+  `/api/ip` 无条件信任 `X-Real-IP` / `X-Forwarded-For`，而覆盖这两个头的是宿主机 nginx，
+  把端口直接暴露到公网等于让任何人伪造来源地址。
   ⚠ **`nginx` 服务挂在 `profiles: ['local']` 下，仅用于本机验证**（`docker compose --profile local up -d`）：
-  线上已有宿主机 nginx 负责 TLS 与分流，默认的 `docker compose up -d` 必须**不**启动它，否则会白拉镜像并占用 8080。
-  ⚠ **两份 nginx 配置不能混用**：`deploy/nginx.conf` 给**宿主机 nginx**（upstream 写 `127.0.0.1:映射端口`），
-  `deploy/nginx.docker.conf` 给 **compose 内的 nginx 容器**（upstream 写服务名 `web` / `api`）。
-  改分流规则时**两份都要同步改**。
+  线上 nginx 由宿主机（宝塔）提供，默认的 `docker compose up -d` 必须**不**启动它，否则会白拉镜像并占用 8080。
+- **三份 nginx 配置职责划分**（改分流 / 安全头 / 缓存规则前先看这张表，三份不能混用）：
+
+  | 文件                       | 谁在用                                   | upstream 写法                       | 性质                                         |
+  | -------------------------- | ---------------------------------------- | ----------------------------------- | -------------------------------------------- |
+  | `deploy/nginx.bt.conf`     | **线上唯一生效**：宝塔托管的宿主机 nginx | `127.0.0.1:8701` / `127.0.0.1:8702` | 线上实配的仓库副本，纯记录，不由 Docker 挂载 |
+  | `deploy/nginx.docker.conf` | compose 内的 `nginx` 容器                | 服务名 `web` / `api`                | 本机复刻生产链路，仅 `--profile local`       |
+  | `deploy/nginx.conf`        | 当前未部署                               | `127.0.0.1:映射端口`                | 无面板环境手工部署的最小参考模板             |
+
+  ⚠ **线上跑的不是 `deploy/nginx.conf`**。已踩过的坑：审计时把它当作实配，据此得出「安全头与
+  来源 IP 覆盖已生效」的结论——**仓库写了不等于线上生效**，结论必须对着 `nginx.bt.conf` 复核。
+
+- **`nginx.bt.conf` 的维护规矩**：宝塔改证书 / 改反代 / 改 TLS 协议时会重写它自己生成的段落，
+  只有 `#SERVER-BLOCK START/END` 之间的内容不会被覆盖，**所有自定义一律写进该段**；
+  面板侧改完配置必须回填仓库副本，两者不一致时**以线上为准并立即同步**。
+  ⚠ **文件里空的 `#PHP-INFO` / `#REWRITE` / `#IP-RESTRICT` / `#BASICAUTH` / `#SUB_FILTER` /
+  `#GZIP` / `#GLOBAL-CACHE` 这 7 组 START/END 锚点必须保留**——面板靠它们把功能内容
+  splice 进对应槽位，删掉锚点后功能会**静默失效**。整理副本时不要顺手删空注释块（已犯过一次）。
+  ⚠ **该副本不可整份覆盖回线上**：它带说明注释与 `← ` 改动标记，且强制 HTTPS / TLS 两项落在
+  面板会重写的段落里。`← ` 标出的行（强制 HTTPS、去 TLSv1.1/3DES、补安全头、开 gzip）
+  优先在面板 UI 落地，只在 `#SERVER-BLOCK` 段内手写自定义指令。
+  SPA fallback 不在 nginx 里做，由 `deploy/server.js` 提供（见 §1）。
 
 ### 7.1 隐私口径（重要）
 
@@ -138,8 +160,16 @@ scripts/                 # 构建辅助脚本（Node ESM，非站点代码）
 - 当前唯一经由服务端的能力是 IP 相关接口（归属地查询、访客 IP 探测），走的是**本站自己的服务**，不经过第三方。
   因此站内文案统一为「计算在浏览器本地完成，数据不外发给第三方（IP 归属地由本站服务端查询）」。
 - **桌面端（Electron）**：页面由 `app://pocketbox` 协议本地托管，23 个纯本地工具照旧零外发；
-  IP 归属地仍查**同一个本站服务端**（构建时注入 `VITE_API_BASE`，后端 CORS 白名单仅 `app://pocketbox`），
-  口径与 Web 一致，无需改上述 5 处文案。桌面端更新走 electron-updater（SW 在桌面环境自动跳过）。
+  IP 归属地仍查**同一个本站服务端**（构建时注入 `VITE_API_BASE`，后端 CORS 白名单仅 `app://pocketbox`）。
+  ⚠ **桌面端唯一的第三方外发是自动更新**：打包后 `electron/main.cjs` 的 electron-updater 会向
+  **GitHub**（`api.github.com` + Releases 资产域名）拉 `latest.yml` 与安装包，更新源登记在
+  `package.json` 的 `build.publish`（owner `pixris-x` / repo `pocketBox`）。该请求只含应用版本与
+  系统架构，不带任何用户内容；SW 在桌面环境仍自动跳过（Web 版继续走 SW 更新）。
+  发布走 `pnpm electron:release`（需 `GH_TOKEN`），`pnpm electron:build` 只本机出包、不会误推版本。
+  因为这条外发只存在于桌面端，Web 站的 4 处文案（`Home/index.vue`、`index.html`、
+  `manifest.webmanifest`、`README.md` 开头）**保持原样仍然准确**；
+  `AppFooter` 则按 `window.pocketbox.desktop` 标识为桌面端追加一句更新源说明，避免口径与实际行为冲突。
+  **换更新源、改发布流程或给桌面端加任何新的第三方请求，都必须回头同步本节。**
 - **新增任何其他外发请求或服务端能力前，必须先回头修改本节**，并同步 `Home/index.vue`、`AppFooter/index.vue`、
   `index.html`（meta description）、`public/manifest.webmanifest`、`README.md` 的隐私表述，
   避免宣传口径与实际行为冲突。

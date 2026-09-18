@@ -7,8 +7,10 @@ services:
     container_name: pocketbox
     restart: unless-stopped
     ports:
-      # 宿主机端口:容器端口 —— 宿主机 nginx 反代指向这个端口
-      - '8701:3000'
+      # 只绑宿主机回环：公网流量一律走宿主机 nginx，不直连容器。
+      # 宿主机 nginx 反代指向这个端口（见 deploy/nginx.conf 的 proxy_pass）；
+      # compose 内的 nginx 容器走服务名 web:3000，不经过这里。
+      - '127.0.0.1:8701:3000'
     healthcheck:
       test: ['CMD', 'wget', '-qO-', 'http://127.0.0.1:3000/']
       interval: 30s
@@ -26,7 +28,8 @@ services:
     ports:
       # 同样只映射到宿主机回环给 nginx 反代用，不要直接暴露到公网：
       # /api/ip 依赖 X-Real-IP / X-Forwarded-For，直接暴露会让人随意伪造来源地址
-      - '8702:8080'
+      # （nginx 会用 proxy_set_header 覆盖这两个头，见 deploy/nginx.conf）
+      - '127.0.0.1:8702:8080'
     healthcheck:
       test: ['CMD', 'curl', '-fsS', 'http://127.0.0.1:8080/api/ip']
       interval: 30s
