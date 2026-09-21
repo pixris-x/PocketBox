@@ -31,10 +31,11 @@ export const tools = [
     id: 'image',
     path: '/tool/image',
     title: '图片工具箱',
-    description: '格式转换与等比缩放、Favicon 多尺寸导出、EXIF 元数据查看与清除，图片不上传',
+    description:
+      '格式转换与等比缩放、批量压缩瘦身、Favicon 多尺寸导出、EXIF 查看与清除，图片不上传',
     icon: 'image',
     category: 'convert',
-    tags: ['图片', '格式转换', 'Favicon', 'EXIF', '隐私'],
+    tags: ['图片', '格式转换', '压缩', 'Favicon', 'EXIF', '隐私'],
   },
   {
     id: 'pdf-tool',
@@ -49,10 +50,10 @@ export const tools = [
     id: 'encoding',
     path: '/tool/encoding',
     title: '文本编解码',
-    description: 'Base64 与 URL 的编码 / 解码，支持文本与文件，Unicode 安全',
+    description: 'Base64、URL、HTML 实体与 Base32 的编码 / 解码，支持文本与文件，Unicode 安全',
     icon: 'code',
     category: 'convert',
-    tags: ['编码', 'Base64', 'URL'],
+    tags: ['编码', 'Base64', 'URL', 'HTML 实体', 'Base32'],
   },
   {
     id: 'url-parse',
@@ -105,10 +106,10 @@ export const tools = [
     id: 'random',
     path: '/tool/random',
     title: '随机生成器',
-    description: '批量生成 UUID v4、随机强密码与中文假文，随机源来自 Web Crypto',
+    description: '批量生成 UUID v4、NanoID 短码、随机强密码与中文假文，随机源来自 Web Crypto',
     icon: 'shuffle',
     category: 'generate',
-    tags: ['生成', 'UUID', '密码', '假文'],
+    tags: ['生成', 'UUID', 'NanoID', '短码', '密码', '假文'],
   },
 
   // ---------- 文本数据 ----------
@@ -176,6 +177,15 @@ export const tools = [
     icon: 'hash',
     category: 'dev',
     tags: ['哈希', 'MD5', 'SHA', '校验'],
+  },
+  {
+    id: 'checksum',
+    path: '/tool/checksum',
+    title: '校验和 / 校验位',
+    description: 'CRC-32 与 Adler-32 校验和（文本或文件），Luhn 与 ISBN-10/13 校验位算检',
+    icon: 'check-circle',
+    category: 'dev',
+    tags: ['校验', 'CRC32', 'Adler32', 'Luhn', 'ISBN', '银行卡'],
   },
   {
     id: 'crypto',

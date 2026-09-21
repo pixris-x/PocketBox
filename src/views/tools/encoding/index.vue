@@ -5,15 +5,21 @@ import { useRoute, useRouter } from 'vue-router'
 import ToolShell from '@/components/ToolShell/index.vue'
 import Base64Panel from './components/Base64Panel/index.vue'
 import UrlPanel from './components/UrlPanel/index.vue'
+import HtmlEntityPanel from './components/HtmlEntityPanel/index.vue'
+import Base32Panel from './components/Base32Panel/index.vue'
 
 const TABS = [
   { label: 'Base64', value: 'base64' },
   { label: 'URL 编解码', value: 'url' },
+  { label: 'HTML 实体', value: 'html' },
+  { label: 'Base32', value: 'base32' },
 ]
 
 const PANELS = {
   base64: Base64Panel,
   url: UrlPanel,
+  html: HtmlEntityPanel,
+  base32: Base32Panel,
 }
 
 const DEFAULT_TAB = 'base64'
@@ -46,7 +52,7 @@ function onChange(value) {
 <template>
   <ToolShell
     title="文本编解码"
-    description="Base64 与 URL 的编码解码，支持文本与文件、Unicode 安全，兼容查询串中的 + 号。"
+    description="Base64、URL、HTML 实体与 Base32 的编码解码，支持文本与文件、Unicode 安全，兼容查询串中的 + 号。"
   >
     <UiCard>
       <UiSection title="功能">

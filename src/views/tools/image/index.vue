@@ -6,15 +6,18 @@ import ToolShell from '@/components/ToolShell/index.vue'
 import ConvertPanel from './components/ConvertPanel/index.vue'
 import FaviconPanel from './components/FaviconPanel/index.vue'
 import ExifPanel from './components/ExifPanel/index.vue'
+import CompressPanel from './components/CompressPanel/index.vue'
 
 const TABS = [
   { label: '格式转换', value: 'convert' },
+  { label: '压缩瘦身', value: 'compress' },
   { label: 'Favicon', value: 'favicon' },
   { label: 'EXIF 元数据', value: 'exif' },
 ]
 
 const PANELS = {
   convert: ConvertPanel,
+  compress: CompressPanel,
   favicon: FaviconPanel,
   exif: ExifPanel,
 }
@@ -49,7 +52,7 @@ function onChange(value) {
 <template>
   <ToolShell
     title="图片工具箱"
-    description="格式转换与缩放、Favicon 多尺寸导出、EXIF 元数据查看与清除。图片不上传，全部本地处理。"
+    description="格式转换与缩放、批量压缩瘦身、Favicon 多尺寸导出、EXIF 元数据查看与清除。图片不上传，全部本地处理。"
   >
     <UiCard>
       <UiSection title="功能">

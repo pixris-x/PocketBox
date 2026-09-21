@@ -1,26 +1,23 @@
 import { describe, it, expect } from 'vitest'
-import { base32Decode, generateHotp, generateTotp, parseOtpauthUri } from '@/common/utils/totp'
+import { generateHotp, generateTotp, parseOtpauthUri } from '@/common/utils/totp'
 
-// RFC 6238 附录 B 的种子：ASCII "12345678901234567890"
+// RFC 6238 附录 B 的种子：ASCII "12345678901234567890" 的 Base32 形式。
+// Base32 编解码本身的用例已随实现迁到 tests/utils/base32.spec.js。
 const SEED_B32 = 'GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ'
-const SEED_ASCII = '12345678901234567890'
 
-describe('base32Decode', () => {
-  it('解码出原始 ASCII 字节', () => {
-    const bytes = base32Decode(SEED_B32)
-    expect(new TextDecoder().decode(bytes)).toBe(SEED_ASCII)
-    expect(bytes).toHaveLength(20)
+describe('密钥解码错误提示（Base32 复用 common/utils/base32）', () => {
+  it('空密钥仍报「密钥为空」，措辞面向用户', async () => {
+    await expect(generateHotp('', 0)).rejects.toThrow('密钥为空')
+    await expect(generateHotp('   ', 0)).rejects.toThrow('密钥为空')
   })
 
-  it('容忍空格 / 连字符 / 小写 / padding', () => {
-    const spaced = 'gezd gnbv-gy3t qojq gezdgnbvgy3tqojq===='
-    expect(Array.from(base32Decode(spaced))).toEqual(Array.from(base32Decode(SEED_B32)))
+  it('非法字符错误由 base32 模块抛出并可穿透', async () => {
+    await expect(generateHotp('ABC1DEF', 0)).rejects.toThrow(/非法字符/)
   })
 
-  it('空密钥与非法字符抛出中文错误', () => {
-    expect(() => base32Decode('')).toThrow('密钥为空')
-    expect(() => base32Decode('   ')).toThrow('密钥为空')
-    expect(() => base32Decode('ABC1DEF')).toThrow(/非法字符/)
+  it('直接传 Uint8Array 时不走 Base32 解码', async () => {
+    const bytes = new TextEncoder().encode('12345678901234567890')
+    expect(await generateHotp(bytes, 0)).toBe('755224')
   })
 })
 

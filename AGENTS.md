@@ -60,7 +60,7 @@ scripts/                 # 构建辅助脚本（Node ESM，非站点代码）
 
 ### 2.1 归属原则（重要）
 
-- **可复用的纯算法**（base64 / md5 / sha / aes / totp / json / JSON 树 / url / 查询串 / 时间戳 / 日期 / 颜色 / diff / 文本批处理 / 空白清理 / EXIF / Cron / Unicode / Markdown(渲染) / Markdown 表格 / XML↔JSON / YAML↔JSON / ICO / PDF / curl 解析 / 命名风格 / CSV / JWT / 进制转换 / IP 子网 / 二维码文本分类 / 复制 / 下载 / 主题 / Service Worker 更新检测等）一律进 `common/utils/`。
+- **可复用的纯算法**（base64 / base32 / md5 / sha / aes / totp / json / JSON 树 / url / HTML 实体 / 查询串 / 时间戳 / 日期 / 颜色 / diff / 文本批处理 / 空白清理 / EXIF / Cron / Unicode / Markdown(渲染) / Markdown 表格 / XML↔JSON / YAML↔JSON / ICO / PDF / curl 解析 / 命名风格 / CSV / JWT / 进制转换 / 校验和(CRC-32·Adler-32) / 校验位(Luhn·ISBN-10/13) / IP 子网 / 二维码文本分类 / 复制 / 下载 / 主题 / Service Worker 更新检测 / 桌面端环境判定等）一律进 `common/utils/`。
   站点级状态（首页筛选条件、最近使用工具等本地持久化）同样进 `common/utils/`（见 `home-state.js`），页面只负责渲染。
   ⚠ 页面按**具体模块路径**引入（`@/common/utils/totp`），不要走 `@/common/utils` 汇总入口——
   汇总会连带解析 pdf-lib / marked / js-yaml 等大依赖。
@@ -159,7 +159,7 @@ scripts/                 # 构建辅助脚本（Node ESM，非站点代码）
 - 工具的**计算**在浏览器本地完成，**数据不外发给第三方**。这是站点的核心卖点，任何改动都不得削弱它。
 - 当前唯一经由服务端的能力是 IP 相关接口（归属地查询、访客 IP 探测），走的是**本站自己的服务**，不经过第三方。
   因此站内文案统一为「计算在浏览器本地完成，数据不外发给第三方（IP 归属地由本站服务端查询）」。
-- **桌面端（Electron）**：页面由 `app://pocketbox` 协议本地托管，23 个纯本地工具照旧零外发；
+- **桌面端（Electron）**：页面由 `app://pocketbox` 协议本地托管，24 个纯本地工具照旧零外发；
   IP 归属地仍查**同一个本站服务端**（构建时注入 `VITE_API_BASE`，后端 CORS 白名单仅 `app://pocketbox`）。
   ⚠ **桌面端唯一的第三方外发是自动更新**：打包后 `electron/main.cjs` 的 electron-updater 会向
   **GitHub**（`api.github.com` + Releases 资产域名）拉 `latest.yml` 与安装包，更新源登记在

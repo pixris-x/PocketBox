@@ -1,0 +1,139 @@
+.cmp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-4);
+}
+
+.cmp-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+
+  &--wide {
+    grid-column: 1 / -1;
+  }
+
+  &__label {
+    font-size: var(--font-sm);
+    color: var(--color-text-secondary);
+  }
+}
+
+.cmp-switch {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+
+  &__text {
+    font-size: var(--font-sm);
+    color: var(--color-text-muted);
+  }
+}
+
+.cmp-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+
+  &__count {
+    font-size: var(--font-sm);
+    color: var(--color-text-secondary);
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+}
+
+.cmp-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.is-shrank {
+  color: var(--color-success);
+}
+
+.is-grew {
+  color: var(--color-warning);
+}
+
+.cmp-item {
+  &__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+  }
+
+  &__name {
+    font-size: var(--font-sm);
+    font-weight: 600;
+    color: var(--color-text);
+    overflow-wrap: anywhere;
+  }
+
+  &__error {
+    margin-top: var(--space-2);
+    font-size: var(--font-sm);
+    color: var(--color-danger);
+  }
+
+  &__pending {
+    margin-top: var(--space-2);
+    font-size: var(--font-sm);
+    color: var(--color-text-muted);
+  }
+
+  &__body {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-4);
+    margin-top: var(--space-3);
+    flex-wrap: wrap;
+  }
+
+  &__thumb {
+    max-width: 180px;
+    max-height: 140px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+    object-fit: contain;
+  }
+
+  &__meta {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    align-items: flex-start;
+  }
+
+  &__sizes {
+    font-size: var(--font-sm);
+    color: var(--color-text-secondary);
+  }
+
+  &__dims {
+    font-size: var(--font-xs);
+    color: var(--color-text-muted);
+  }
+
+  &__delta {
+    font-size: var(--font-sm);
+    margin-bottom: var(--space-2);
+  }
+}
+
+@media (max-width: 640px) {
+  .cmp-item__body {
+    flex-direction: column;
+  }
+}

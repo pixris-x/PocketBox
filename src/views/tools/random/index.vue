@@ -6,15 +6,18 @@ import ToolShell from '@/components/ToolShell/index.vue'
 import UuidPanel from './components/UuidPanel/index.vue'
 import PasswordPanel from './components/PasswordPanel/index.vue'
 import FakeTextPanel from './components/FakeTextPanel/index.vue'
+import NanoidPanel from './components/NanoidPanel/index.vue'
 
 const TABS = [
   { label: 'UUID', value: 'uuid' },
+  { label: '短码 NanoID', value: 'nanoid' },
   { label: '密码', value: 'password' },
   { label: '中文假文', value: 'fake-text' },
 ]
 
 const PANELS = {
   uuid: UuidPanel,
+  nanoid: NanoidPanel,
   password: PasswordPanel,
   'fake-text': FakeTextPanel,
 }
@@ -49,7 +52,7 @@ function onChange(value) {
 <template>
   <ToolShell
     title="随机生成器"
-    description="批量生成 UUID v4、强密码与中文假文，随机源来自 Web Crypto，全部本地生成。"
+    description="批量生成 UUID v4、NanoID 短码、强密码与中文假文，随机源来自 Web Crypto，全部本地生成。"
   >
     <UiCard>
       <UiSection title="功能">
