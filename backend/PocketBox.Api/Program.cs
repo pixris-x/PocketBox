@@ -2,6 +2,10 @@ using IP2Region.Net.Abstractions;
 using IP2Region.Net.XDB;
 using PocketBox.Api.Endpoints;
 using PocketBox.Api.Services;
+using System.Net;
+using Microsoft.AspNetCore.HttpOverrides;
+
+using NetIPNetwork = System.Net.IPNetwork;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,9 +44,27 @@ builder.Services.AddCors(options =>
     options.AddDefaultPolicy(policy =>
         policy.WithOrigins("app://pocketbox").WithMethods("GET").WithHeaders("Accept")
     );
-});
+}); 
 
 var app = builder.Build();
+
+app.UseForwardedHeaders(
+    new ForwardedHeadersOptions
+    {
+        ForwardedHeaders =
+            ForwardedHeaders.XForwardedFor |
+            ForwardedHeaders.XForwardedProto,
+
+        // 信任 Docker 内部 172.16.0.0 - 172.31.255.255 的代理
+        KnownIPNetworks =
+        {
+            new NetIPNetwork(
+                IPAddress.Parse("172.16.0.0"),
+                12
+            )
+        }
+    }
+);
 
 app.UseCors();
 
