@@ -11,7 +11,7 @@ import { fileURLToPath } from 'node:url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
-const PORT = Number(process.env.PORT) || 3000
+const PORT = Number(process.env.PORT) || 3111
 const DIST = path.resolve(__dirname, '../dist')
 const INDEX = path.join(DIST, 'index.html')
 
@@ -101,6 +101,6 @@ const server = http.createServer((req, res) => {
   })
 })
 
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`pocket-box serving dist/ at http://0.0.0.0:${PORT}`)
 })
