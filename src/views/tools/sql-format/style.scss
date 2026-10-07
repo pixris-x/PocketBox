@@ -1,0 +1,71 @@
+.sql {
+  &-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-3);
+  }
+
+  &-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    min-width: 0;
+
+    &__label {
+      font-size: var(--font-xs);
+      color: var(--color-text-secondary);
+    }
+  }
+
+  &-switches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+    min-height: 36px;
+  }
+
+  &-switch {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--font-sm);
+    color: var(--color-text);
+  }
+
+  &-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-bottom: var(--space-3);
+  }
+
+  &-actions {
+    display: flex;
+    gap: var(--space-2);
+    margin-top: var(--space-3);
+  }
+
+  &-empty {
+    font-size: var(--font-sm);
+    color: var(--color-text-muted);
+  }
+
+  &-notes {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin: 0;
+    padding-left: 1.2em;
+    font-size: var(--font-sm);
+    line-height: 1.7;
+    color: var(--color-text-secondary);
+
+    code {
+      font-family: var(--font-mono);
+      font-size: var(--font-xs);
+      padding: 1px 4px;
+      background: var(--color-surface-2);
+      border-radius: 3px;
+    }
+  }
+}

@@ -1,0 +1,103 @@
+.jt-types {
+  &__bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-top: var(--space-3);
+  }
+
+  &__error {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-2);
+    margin-top: var(--space-3);
+    font-size: var(--font-sm);
+    color: var(--color-danger);
+
+    svg {
+      flex-shrink: 0;
+      // 全局 reset 有 svg{display:block}，vertical-align 失效，需用 margin 居中
+      margin-top: calc((1.5em - 15px) / 2);
+    }
+  }
+
+  &__options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: var(--space-3);
+  }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    min-width: 0;
+  }
+
+  &__label {
+    font-size: var(--font-xs);
+    color: var(--color-text-secondary);
+  }
+
+  &__note {
+    margin-top: var(--space-4);
+    font-size: var(--font-xs);
+    line-height: 1.6;
+    color: var(--color-text-muted);
+  }
+
+  &__stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+    gap: var(--space-3);
+  }
+
+  &__stat {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    padding: var(--space-4);
+    background: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+
+    &-value {
+      font-size: var(--font-xl);
+      font-weight: 500;
+      line-height: 1.2;
+      color: var(--color-text);
+    }
+
+    &-label {
+      font-size: var(--font-xs);
+      color: var(--color-text-secondary);
+    }
+  }
+
+  &__tabs {
+    overflow-x: auto;
+    // UiSection 之间的间距靠「相邻兄弟选择器」实现（.ui-section + .ui-section），
+    // 中间夹了这个 div 就完全不生效，导致统计卡与 Tab 栏贴在一起。
+    // 上下都补 space-6：下方虽会与下一个 UiSection 的 margin-top 叠加（margin 不折叠），
+    // 但这里要的是「明确分隔两段内容」，略大的间距比贴在一起好。
+    margin: var(--space-6) 0;
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    margin-top: var(--space-3);
+  }
+
+  &__actions-hint {
+    font-size: var(--font-xs);
+    color: var(--color-text-muted);
+  }
+
+  &__empty {
+    font-size: var(--font-sm);
+    color: var(--color-text-muted);
+  }
+}

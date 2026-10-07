@@ -13,7 +13,7 @@ services:
       PORT: 3111
 
     expose:
-      - "3111"
+      - '3111'
 
     healthcheck:
       test:
@@ -31,7 +31,6 @@ services:
         aliases:
           - pocketbox.web.pixris.com
 
-
   api:
     build:
       context: ./backend
@@ -46,7 +45,7 @@ services:
       ASPNETCORE_ENVIRONMENT: Production
 
     expose:
-      - "4111"
+      - '4111'
 
     healthcheck:
       test:
@@ -63,7 +62,6 @@ services:
       web:
         aliases:
           - pocketbox-api.web.pixris.com
-
 
 networks:
   web:
