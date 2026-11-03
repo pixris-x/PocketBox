@@ -1,6 +1,6 @@
 # 口袋工具箱 PocketBox (pocketBox)
 
-一个网页工具站：**Vite + Vue 3 + SCSS** 前端 + **.NET 10 Minimal API** 后端。工具计算全部在浏览器本地完成，**数据不外发给第三方**；仅 IP 归属地查询与访客 IP 探测经由本站服务端。
+一个网页工具站：**Vite + Vue 3 + SCSS** 前端 + **.NET 10 Minimal API** 后端。工具计算全部在浏览器本地完成，**数据不外发给第三方**；仅 IP 归属地查询经由本站服务端。
 
 > ⚠️ 开发 / 维护前请先阅读 [AGENTS.md](./AGENTS.md)（项目强制开发规则）。
 
@@ -39,7 +39,7 @@
 | HTTP 状态码 / MIME 速查 | 状态码与 Content-Type 对照表，可过滤                                 |
 | Unicode 字符查询        | 逐码点看 UTF-8 / HTML 实体 / JS 转义，可反向还原                     |
 | 命名风格转换            | camelCase / snake_case 等 8 种命名风格互转                           |
-| IP 工具                 | CIDR 子网计算（本地）+ 归属地查询与我的公网 IP（服务端）             |
+| IP 工具                 | CIDR 子网计算（本地）+ 归属地查询（服务端）                          |
 | 证件与信息校验          | 身份证 / 银行卡 / 手机号校验 + 敏感信息批量脱敏                      |
 | 测试数据生成            | 批量生成能通过校验的假数据，可导出 CSV / JSON                        |
 | UTM 跟踪链接            | 追加 utm 参数并校验空格，已有 UTM 会被覆盖而非追加                   |
@@ -112,13 +112,13 @@ pnpm lint        # ESLint 检查（pnpm lint:fix 自动修复）
 pnpm format      # Prettier 格式化（pnpm format:check 只检查）
 pnpm test        # 单元测试（pnpm test:watch 监听模式）
 
-# 后端（「IP 归属地」「我的 IP」需要它）
+# 后端（「IP 归属地」需要它）
 dotnet build backend/PocketBox.slnx          # 编译
 dotnet run --project backend/PocketBox.Api   # 起服务（http://localhost:5048）
 ```
 
 前后端各自启动即可联调：`vite.config.js` 的 `server.proxy` 已把 `/api` 转发到后端端口。
-后端没起时，只有 IP 工具的两个联网页签会提示未检测到服务，其余工具不受影响。
+后端没起时，只有 IP 工具的「IP 归属地」页签会提示未检测到服务，其余工具不受影响。
 
 ## 目录结构
 
@@ -150,15 +150,12 @@ pocketBox/
 │     ├─ Services/             #   领域逻辑
 │     └─ Contracts/            #   请求 / 响应模型
 ├─ deploy/                     # 部署相关
-│  ├─ server.js                #   容器内零依赖 Node 静态服务器（SPA fallback + ETag 协商缓存）
-│  ├─ nginx.bt.conf            #   ★ 线上唯一生效配置的仓库副本（宝塔托管的宿主机 nginx）
-│  ├─ nginx.docker.conf        #   compose 内 nginx 容器用（upstream 用服务名 web / api）
-│  └─ nginx.conf               #   无面板环境的宿主机 nginx 参考模板（当前未部署）
+│  └─ server.js                #   容器内零依赖 Node 静态服务器（SPA fallback + ETag 协商缓存）
 ├─ public/                     # 静态资产（favicon / apple-touch-icon / logo.svg /
 │                              #   manifest.webmanifest / sw.js / PWA 图标）
 ├─ tests/                      # 单元测试（utils/ 公共纯函数、tools/ 页面私有算法）
 ├─ Dockerfile                  # 前端两阶段构建，运行阶段只含 dist + server.js
-└─ docker-compose.yml          # web（127.0.0.1:8701:3000）+ api（127.0.0.1:8702:8080）+ nginx（8080:80，仅 local profile）
+└─ docker-compose.yml          # web + api 两个服务，挂外部 Docker 网络 web（按网络别名供宿主机反代访问）
 ```
 
 ## 新增一个工具
@@ -201,11 +198,10 @@ tests/
 
 ## 后端（.NET 10 Minimal API）
 
-`backend/` 承载「必须服务端才能做」的能力，目前是 IP 相关接口：
+`backend/` 承载「必须服务端才能做」的能力，目前是 IP 归属地接口：
 
 | 端点                 | 说明                                                               |
 | -------------------- | ------------------------------------------------------------------ |
-| `GET /api/ip`        | 回报访问者自己的公网 IP                                            |
 | `GET /api/ip/region` | 查归属地；省略 `ip` 参数即查访问者自己（一次同时拿到 IP 与归属地） |
 
 **本地调试用 Swagger UI**：仅在 `Development` 环境可用，入口 `/swagger`；文档由内置的
@@ -220,9 +216,9 @@ VS 与 `dotnet run` 默认就是开发环境，`launchSettings.json` 已把启�
 
 - **归属地数据**：`backend/data/ip2region_v4.xdb`（约 11MB，Apache-2.0 / MIT）启动时一次性载入内存
   （`CachePolicy.Content`，官方 benchmark 约 53ns/次，比 `VectorIndex` 快约 80 倍）。
-- **访客地址**：读反向代理写入的 `X-Real-IP` / `X-Forwarded-For`（见 `deploy/nginx.conf`），
+- **访客地址**：读反向代理写入的 `X-Real-IP` / `X-Forwarded-For`，
   直连时回落连接地址，并把 `::ffff:1.2.3.4` 这类 IPv6-mapped 形式还原成 IPv4。
-  这两个头可被伪造，因此 **API 端口只映射到宿主机给 nginx 用，不要直接暴露到公网**。
+  这两个头可被伪造，因此 **API 端口只映射到宿主机给反代用，不要直接暴露到公网**。
 - **不写日志、不做持久化**，响应带 `Cache-Control: no-store`。
 - **数据持久化尚未引入**：工具功能都不需要存储，将来真有需求时按 `AGENTS.md` §7 选型 PostgreSQL。
 
@@ -235,7 +231,7 @@ VS 与 `dotnet run` 默认就是开发环境，`launchSettings.json` 已把启�
   - 导航请求：网络优先，离线回退 `/index.html`（前端路由接着渲染对应页面或 404 页）
   - `/assets/`（文件名带 hash）：缓存优先，可长期复用
   - 其他同源资源：Stale-While-Revalidate
-  - `/api/`：**完全不交给 SW** —— API 响应一旦被缓存，就会持续返回过期的出口 IP
+  - `/api/`：**完全不交给 SW** —— API 响应一旦被缓存，就会持续返回过期数据（归属地库随版本更新）
 - 注册逻辑在 `src/common/utils/sw.js`（由 `src/main.js` 调用），**仅生产构建注册**（`import.meta.env.PROD`），不干扰开发环境 HMR
 - 更新检测：`sw.js` 的 install 阶段是无条件 `skipWaiting()`、activate 阶段 `clients.claim()`，新版本会立即接管。因此页面侧**不能用 `registration.waiting` 判断是否有新版本**（正常更新路径下它恒为 `null`），而是监听 `controllerchange`，随后由 `AppUpdatePrompt` 提示「已更新到新版本」，由用户决定何时刷新（首次安装不误报）。
 
@@ -250,62 +246,34 @@ VS 与 `dotnet run` 默认就是开发环境，`launchSettings.json` 已把启�
 
 ## 部署
 
-本项目采用**自托管**方式：在同一台机器上用 Docker 跑静态容器与 API 容器，由宿主机 nginx 反向代理对外服务。
-宿主机的 nginx 由**宝塔面板**托管，其线上实配记录在 `deploy/nginx.bt.conf`。
+本项目采用**自托管**方式：在同一台机器上用 Docker 跑静态容器与 API 容器，两个容器挂到外部 Docker 网络 `web`
+（首次部署先 `docker network create web`），由宿主机自带的反代工具按容器网络别名访问、对外服务（线上实配不入库）。
 
 ```
-浏览器 → 宿主机 nginx（宝塔，80/443，TLS + 分流 + 安全头）  ← 实配见 deploy/nginx.bt.conf
-           ├─ /api/     → proxy_pass 127.0.0.1:8702 → API 容器（.NET，IP 归属地 / 访客 IP）
-           └─ 其余路径  → proxy_pass 127.0.0.1:8701 → 静态容器（Node，dist/ + SPA fallback）
+浏览器 → 宿主机反代（80/443，TLS + 分流）
+           ├─ /api/     → http://pocketbox-api.web.pixris.com:4111 → API 容器（.NET，IP 归属地）
+           └─ 其余路径  → http://pocketbox.web.pixris.com:3111 → 静态容器（Node，dist/ + SPA fallback）
 ```
 
-> ⚠ **`deploy/nginx.conf` 不是线上实配**，只是无面板环境的参考模板。审计安全性、改分流或加响应头时，
-> 必须对着 `nginx.bt.conf` 判断，否则会得出「仓库写了但线上没生效」的错误结论（已经踩过一次）。
-> 三份配置的完整职责划分见 [AGENTS.md](./AGENTS.md) §7。
-
-### 本机验证（compose 内置 nginx，宿主机无需装 nginx）
-
-`docker-compose.yml` 里的 `nginx` 服务就是为这个场景准备的：它和 `web`、`api` 在同一个 compose 网络内，
-把 `/api/` 转给 api 服务、其余转给静态服务，完整复刻生产链路。
-
-它挂在 **`local` profile** 下，所以默认的 `docker compose up -d` 不会启动它，必须显式带上 profile：
-
-```bash
-docker compose --profile local up -d --build
-# 然后打开 http://localhost:8080/ ，就是完整站点（含 IP 归属地）
-```
-
-- **线上不需要它** —— 线上已有宿主机 nginx 负责 TLS 与 `/api/` 分流，再起一个容器版只会白拉镜像、
-  白占 8080。所以给它加了 `profiles: ['local']`，线上直接 `docker compose up -d` 时会自动跳过。
-- 入口用 **8080** 而不是 80：宿主机 80 常被 Windows 的 HTTP.sys 占用。改 `docker-compose.yml` 里
-  `'8080:80'` 左侧数字即可换端口。
-- 它挂载的是 **`deploy/nginx.docker.conf`** —— upstream 写的是 compose 服务名（`web` / `api`），
-  只能给容器里的 nginx 用；宿主机侧的另外两份（线上实配 `nginx.bt.conf`、参考模板 `nginx.conf`）
-  写的是 `127.0.0.1:映射端口`。**三份不能混用。**
-- 本机访问时「我的 IP」会显示容器网关地址（形如 `172.18.0.1`）而不是真实公网 IP —— 本机环境拿不到
-  自己的公网出口地址，属正常现象；线上经真实 nginx 反代时会正确显示访客地址。
+> ⚠ 线上反代实配不入库。审计安全性、改分流或加响应头时必须对着线上实际的反代配置判断，
+> 否则会得出「仓库写了但线上没生效」的错误结论（已经踩过一次）。相关约定见 [AGENTS.md](./AGENTS.md) §7。
 
 ### 步骤
 
 ```bash
-docker compose up -d --build   # 构建并后台启动 web + api（nginx 属 local profile，不会被启动）
+docker compose up -d --build   # 构建并后台启动 web + api
 docker compose logs -f         # 查看日志（加服务名可只看一个：logs -f api）
 docker compose down            # 停止并移除容器
 ```
 
-1. `web` 映射到宿主机 **8701**、`api` 映射到 **8702**，两个端口都**只绑回环**（`127.0.0.1:` 前缀），公网入口一律走宿主机 nginx；
-   换端口改 `ports` 的**中间**一段数字，**不要删掉 `127.0.0.1:` 前缀** —— 删了等于把 API 直接挂到公网，
-   而 `/api/ip` 信任 `X-Real-IP` / `X-Forwarded-For`，届时任何人都能伪造来源地址（覆盖这两个头的是 nginx，不是容器）；
-2. 宿主机 nginx 配 `/api/` 分流，按你的环境二选一：
-   - **宝塔（线上现状）**：站点先设为反代到 `http://127.0.0.1:8701`，再在「配置文件」的
-     `#SERVER-BLOCK START/END` 段内补上 `location ^~ /api/` 指向 `127.0.0.1:8702` ——
-     整段可直接照抄 `deploy/nginx.bt.conf`。只有这一段面板不会覆盖，自定义务必写在这里；
-     用面板 UI 改的项（证书、强制 HTTPS、TLS 协议版本）改完要把结果**回填进该副本**。
-   - **无面板**：把 `deploy/nginx.conf` 放进 `sites-enabled/`（改 `server_name` 与两个 `proxy_pass` 端口），
-     HTTPS 用 `certbot --nginx -d your.domain.com` 一键补齐。
-     两种方式都必须先 `nginx -t` 通过再 reload —— 本机没有 nginx 与 Docker，这一步只能在服务器上验。
-3. 验证分流与来源 IP 传递：`curl -s https://<域名>/api/ip` 应返回你的公网出口地址；
-   若返回 `172.x` 之类的容器网关地址，说明 `X-Real-IP` 没有正确传递，反代头需要回查。
+1. 两个服务都**不映射宿主机端口**（只有 `expose`），只挂在外部 Docker 网络 `web` 上，反代按网络别名访问：
+   `pocketbox.web.pixris.com:3111`（静态）、`pocketbox-api.web.pixris.com:4111`（API）。
+   **不要给它们加 `ports:` 映射** —— `/api/ip/region` 信任 `X-Real-IP` / `X-Forwarded-For`，
+   把 API 端口暴露到 `web` 网络之外等于让任何人绕过反代伪造来源地址（覆盖这两个头的是宿主机反代，不是容器）；
+2. 宿主机反代配 `/api/` 分流：`/api/` 指向 `http://pocketbox-api.web.pixris.com:4111`，其余路径指向
+   `http://pocketbox.web.pixris.com:3111`，并覆盖写入 `X-Real-IP` / `X-Forwarded-For` / `X-Forwarded-Proto` 三个头。
+3. 验证分流与来源 IP 传递：`curl -s 'https://<域名>/api/ip/region'` 应返回你的公网出口地址的归属地；
+   若解析到 `172.x` 之类的容器网关地址，说明 `X-Real-IP` 没有正确传递，反代头需要回查。
 
 宿主机无需安装 Node 或 .NET SDK —— 前端构建与后端发布都在容器构建阶段完成。
 
@@ -314,62 +282,24 @@ docker compose down            # 停止并移除容器
 > 它另有一处与性能相关的约定：非 `/assets/` 的响应走 `no-cache` + `ETag` 协商缓存，
 > 让图标 / manifest 这类不带内容 hash 的文件重复访问时只交换一个 304。
 
-> 若将来在 nginx 前再挂 CDN，`X-Real-IP` 会变成 CDN 节点地址、「我的 IP」随之显示错误结果，
-> 需要在宿主机启用 `ngx_http_realip_module`（`set_real_ip_from <CDN 回源段>;` +
-> `real_ip_header X-Forwarded-For;`）才能还原真实客户端地址。
-
-<details>
-<summary>接入已有的 nginx（含宝塔面板）：<code>location /api/</code> 怎么加</summary>
-
-`deploy/nginx.conf` 是**无面板环境的参考模板**（本站线上实配记录在 `deploy/nginx.bt.conf`）；
-真实环境往往已经有自己的站点配置（证书路径、其他站点、面板模板）。
-此时**不要整份替换**，只补下面这一段分流即可，其余保持不动：
-
-```nginx
-# 加进现有 server 块。若 80 与 443 写在同一个 server 块里，只需加一次
-location ^~ /api/ {
-    proxy_pass http://127.0.0.1:8702;        # ⚠ 末尾不要加斜杠，否则 /api 前缀会被吃掉
-
-    proxy_http_version 1.1;
-    proxy_set_header Host $http_host;
-    proxy_set_header X-Real-IP $remote_addr;
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    proxy_set_header X-Forwarded-Proto $scheme;
-}
-```
-
-**原有 `location ^~ /`（指向前端 8701）无需调整位置。** nginx 的匹配规则是「**最长 `^~` 前缀优先**」：
-`/api/ip` 同时匹配 `/api/` 与 `/`，而 `/api/` 更长，所以它胜出 —— 与两个块谁写在前面无关。
-
-**宝塔面板**：走「配置文件 → 自定义配置文件 → 选择配置块 `server块`」，把上面这段粘进去后保存并重载。
-面板会把它写进 `/www/server/panel/vhost/nginx/extension/<域名>/`，再由主配置里的 `include` 引入；
-好处是面板重新生成主配置时不会把它冲掉，比直接改主配置文件更稳。
-
-> 宝塔有两个「面板不会覆盖」的落点：主配置里的 `#SERVER-BLOCK START/END` 段，以及上面说的 `extension/` 目录。
-> 本站线上目前用的是前者（`/api/` 直接写在主配置的 SERVER-BLOCK 段内，与 `deploy/nginx.bt.conf` 一致）。
-> 无论用哪一个，`extension/*.conf` 的内容都**不在主配置文件里**，排障时容易漏看；
-> 只要往那里挪了东西，就要同步回填 `nginx.bt.conf`，否则仓库副本又变成假的实配。
-
-验证（两条都该返回 JSON，而不是 HTML）：
-
-```bash
-curl -i https://<域名>/api/ip
-curl -i 'https://<域名>/api/ip/region?ip=114.114.114.114'
-```
-
-</details>
+> 若将来在反代前再挂 CDN，`X-Real-IP` 会变成 CDN 节点地址、归属地自查询随之定位到 CDN 节点，
+> 需要在宿主机反代上还原真实客户端地址（把 CDN 回源段配成可信代理，改从 `X-Forwarded-For` 取真实来源）。
 
 <details>
 <summary>环境没有 compose 插件？用等价的 <code>docker run</code></summary>
 
 ```bash
+# external 网络需已存在：docker network create web
+
 # 静态容器
 docker build -t pocketbox:latest .
-docker run -d --name pocketbox --restart unless-stopped -p 127.0.0.1:8701:3000 pocketbox:latest
+docker run -d --name pocketbox --restart unless-stopped \
+  --network web --network-alias pocketbox.web.pixris.com pocketbox:latest
 
 # API 容器（构建上下文是 backend/）
 docker build -t pocketbox-api:latest ./backend
-docker run -d --name pocketbox-api --restart unless-stopped -p 127.0.0.1:8702:8080 pocketbox-api:latest
+docker run -d --name pocketbox-api --restart unless-stopped \
+  --network web --network-alias pocketbox-api.web.pixris.com pocketbox-api:latest
 
 docker logs -f pocketbox        # 查看日志
 docker rm -f pocketbox          # 停止并移除
@@ -385,29 +315,9 @@ docker rm -f pocketbox          # 停止并移除
 
 - **Netlify**：`dist/_redirects` 写入 `/* /index.html 200`
 - **Vercel**：`vercel.json` 配置 `{ "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }] }`
-- **nginx 直接托管静态文件**（不经容器，把 `dist/` 拷到服务器，用 `try_files` 回退）：
-
-  ```nginx
-  server {
-      listen 80;
-      server_name your.domain;
-      root /var/www/pocketbox;   # dist/ 的内容
-      index index.html;
-
-      location /assets/ {
-          expires 1y;
-          add_header Cache-Control "public, immutable";
-      }
-
-      location / {
-          try_files $uri $uri/ /index.html;
-      }
-  }
-  ```
-
 - **GitHub Pages**：放一份与 `index.html` 内容相同的 `404.html`
 
-以上任一方式都只有前端，IP 归属地与「我的 IP」需要另外自行部署 `backend/`。
+以上任一方式都只有前端，IP 归属地需要另外自行部署 `backend/`。
 </details>
 
 > 注意：History 路由 + 绝对 base 意味着**不能用 `file://` 直接打开** `dist/index.html`，必须经由 HTTP 服务器。JavaScript 压缩工具使用 Web Worker，同样需要 HTTP 环境。开发时 `pnpm dev` 自带 fallback，无需额外配置。

@@ -65,7 +65,7 @@ scripts/                 # 构建辅助脚本（Node ESM，非站点代码）
   ⚠ 页面按**具体模块路径**引入（`@/common/utils/totp`），不要走 `@/common/utils` 汇总入口——
   汇总会连带解析 pdf-lib / marked / js-yaml 等大依赖。
 - **页面专属逻辑**（密码生成、Canvas 图片转换、terser worker 封装、页面状态编排、接口调用封装）放页面自身 `scripts/` 与 `components/`。
-- **需要服务端才能做或需要联网的能力**（IP 归属地查询、访客 IP 探测）放 `backend/`；页面里的调用必须封装进 `scripts/` 模块，不要在组件中散写 `fetch`。
+- **需要服务端才能做或需要联网的能力**（IP 归属地查询）放 `backend/`；页面里的调用必须封装进 `scripts/` 模块，不要在组件中散写 `fetch`。
 - **禁止复制粘贴公共函数**到页面目录；需要就用 `import` 引用。
 - 页面文件夹结构约定统一（index.vue + components/ + styles/ + scripts/），某页不涉及某类时允许省略该子目录，但约定不变。
 
@@ -118,46 +118,26 @@ scripts/                 # 构建辅助脚本（Node ESM，非站点代码）
 - **技术栈**：.NET 10 + Minimal API。**数据持久化尚未引入**，将来需要时选型为 PostgreSQL。
 - **目录职责**：`Endpoints/` 只做参数绑定与响应编排，`Services/` 放领域逻辑，`Contracts/` 放请求 / 响应模型。
   `Program.cs` 只做 DI 注册与服务装配，不要把业务逻辑写进去。
-- **端点命名**：统一挂在 `/api/` 下，按资源分组（如 `/api/ip`、`/api/ip/region`）。
+- **端点命名**：统一挂在 `/api/` 下，按资源分组（如 `/api/ip/region`）。
 - **配置**：路径、开关走 `appsettings.json`，但必须都有可用的默认值，保证 `dotnet run` 零配置能起来。
 - **前端调用**：统一封装在对应页面的 `scripts/` 模块中，组件里不直接写 `fetch`。
   （调用点目前只有一个端点族，暂不抽 `src/api/` 层；等业务接口变多再抽。）
 - **调试**：`Development` 环境启用 Swagger UI（入口 `/swagger`，文档 `/openapi/v1.json`），
   新增端点会自动出现在文档里，无需额外维护。**生产环境必须保持关闭**（`app.Environment.IsDevelopment()` 守卫），
   线上是公网服务，不对外公开接口文档。
-- **部署**：`docker-compose.yml` 有 `web`（静态）、`api`（.NET）、`nginx`（统一入口）三个服务；
-  nginx 把 `/api/` 整段转发给 api，静态容器不再处理任何接口。
-  ⚠ **`web` / `api` 的宿主机端口必须保留 `127.0.0.1:` 前缀**（现 `8701` / `8702` 只绑回环）：
-  `/api/ip` 无条件信任 `X-Real-IP` / `X-Forwarded-For`，而覆盖这两个头的是宿主机 nginx，
-  把端口直接暴露到公网等于让任何人伪造来源地址。
-  ⚠ **`nginx` 服务挂在 `profiles: ['local']` 下，仅用于本机验证**（`docker compose --profile local up -d`）：
-  线上 nginx 由宿主机（宝塔）提供，默认的 `docker compose up -d` 必须**不**启动它，否则会白拉镜像并占用 8080。
-- **三份 nginx 配置职责划分**（改分流 / 安全头 / 缓存规则前先看这张表，三份不能混用）：
-
-  | 文件                       | 谁在用                                   | upstream 写法                       | 性质                                         |
-  | -------------------------- | ---------------------------------------- | ----------------------------------- | -------------------------------------------- |
-  | `deploy/nginx.bt.conf`     | **线上唯一生效**：宝塔托管的宿主机 nginx | `127.0.0.1:8701` / `127.0.0.1:8702` | 线上实配的仓库副本，纯记录，不由 Docker 挂载 |
-  | `deploy/nginx.docker.conf` | compose 内的 `nginx` 容器                | 服务名 `web` / `api`                | 本机复刻生产链路，仅 `--profile local`       |
-  | `deploy/nginx.conf`        | 当前未部署                               | `127.0.0.1:映射端口`                | 无面板环境手工部署的最小参考模板             |
-
-  ⚠ **线上跑的不是 `deploy/nginx.conf`**。已踩过的坑：审计时把它当作实配，据此得出「安全头与
-  来源 IP 覆盖已生效」的结论——**仓库写了不等于线上生效**，结论必须对着 `nginx.bt.conf` 复核。
-
-- **`nginx.bt.conf` 的维护规矩**：宝塔改证书 / 改反代 / 改 TLS 协议时会重写它自己生成的段落，
-  只有 `#SERVER-BLOCK START/END` 之间的内容不会被覆盖，**所有自定义一律写进该段**；
-  面板侧改完配置必须回填仓库副本，两者不一致时**以线上为准并立即同步**。
-  ⚠ **文件里空的 `#PHP-INFO` / `#REWRITE` / `#IP-RESTRICT` / `#BASICAUTH` / `#SUB_FILTER` /
-  `#GZIP` / `#GLOBAL-CACHE` 这 7 组 START/END 锚点必须保留**——面板靠它们把功能内容
-  splice 进对应槽位，删掉锚点后功能会**静默失效**。整理副本时不要顺手删空注释块（已犯过一次）。
-  ⚠ **该副本不可整份覆盖回线上**：它带说明注释与 `← ` 改动标记，且强制 HTTPS / TLS 两项落在
-  面板会重写的段落里。`← ` 标出的行（强制 HTTPS、去 TLSv1.1/3DES、补安全头、开 gzip）
-  优先在面板 UI 落地，只在 `#SERVER-BLOCK` 段内手写自定义指令。
-  SPA fallback 不在 nginx 里做，由 `deploy/server.js` 提供（见 §1）。
+- **部署**：`docker-compose.yml` 只有 `web`（静态）、`api`（.NET）两个服务，都挂在外部 Docker 网络 `web` 上，
+  以网络别名（`pocketbox.web.pixris.com:3111` / `pocketbox-api.web.pixris.com:4111`）供宿主机反代访问；
+  `/api/` 由宿主机反代整段转发给 api 容器，静态容器不处理任何接口。
+  ⚠ **两个服务只用 `expose`，不要加 `ports:` 映射**：`/api/ip/region` 无条件信任 `X-Real-IP` / `X-Forwarded-For`，
+  而覆盖这两个头的是宿主机反代，把 API 端口暴露到 `web` 网络之外等于让任何人伪造来源地址。
+- **反代配置**：不入库，线上实配由宿主机自带的反代工具管理。
+  ⚠ 审计安全头 / 来源 IP 覆盖是否生效时必须对着线上实际配置复核，不能凭仓库内容下结论（已踩过的坑）。
+  SPA fallback 不在反代里做，由 `deploy/server.js` 提供（见 §1）。
 
 ### 7.1 隐私口径（重要）
 
 - 工具的**计算**在浏览器本地完成，**数据不外发给第三方**。这是站点的核心卖点，任何改动都不得削弱它。
-- 当前唯一经由服务端的能力是 IP 相关接口（归属地查询、访客 IP 探测），走的是**本站自己的服务**，不经过第三方。
+- 当前唯一经由服务端的能力是 IP 归属地查询，走的是**本站自己的服务**，不经过第三方。
   因此站内文案统一为「计算在浏览器本地完成，数据不外发给第三方（IP 归属地由本站服务端查询）」。
 - **桌面端（Electron）**：页面由 `app://pocketbox` 协议本地托管，33 个纯本地工具照旧零外发；
   IP 归属地仍查**同一个本站服务端**（构建时注入 `VITE_API_BASE`，后端 CORS 白名单仅 `app://pocketbox`）。
@@ -172,7 +152,7 @@ scripts/                 # 构建辅助脚本（Node ESM，非站点代码）
   因此**禁止给 `build.publish` 配 token**：那等于把私有仓库的读权限打进分发的安装包交出去。
   当前状态下桌面端升级实际靠手动重装（去 Releases 页面下 exe），代码与配置齐备但对外等于没有。
   真要启用，三选一后再动 `build.publish`：① 仓库转 public；② 改 `provider: 'generic'`
-  指本站 `https://pocketbox.pixris.online/desktop/`（可写在 `#SERVER-BLOCK` 安全区内，隐私口径也更干净）；
+  指本站 `https://pocketbox.pixris.online/desktop/`（在宿主机反代上配一段静态目录即可，隐私口径也更干净）；
   ③ 另建一个只放 Release 资产的 public 仓库、`publish.owner/repo` 指过去。
   另外仓库从未发布过任何 Release，整条链路一次都没真跑通过。
   因为这条外发只存在于桌面端，Web 站的 4 处文案（`Home/index.vue`、`index.html`、
@@ -193,7 +173,7 @@ scripts/                 # 构建辅助脚本（Node ESM，非站点代码）
 
 - **ESLint**（`eslint.config.js`，扁平配置）+ **Prettier**（`.prettierrc`）+ **Vitest**（`tests/`），配置文件与忽略规则已就绪。
 - 常用命令：`pnpm lint`（检查）、`pnpm lint:fix`（自动修复）、`pnpm format`（格式化）、`pnpm format:check`（只检查）、`pnpm test`（跑一遍单元测试）、`pnpm test:watch`（监听模式）。
-- **提交前请本地保证 `pnpm format:check`、`pnpm lint`、`pnpm test` 均为零问题**，再执行 `pnpm build` 确认可构建。项目自托管（Docker + nginx 反代），没有云端 CI，这四步就是发布前的全部门禁。
+- **提交前请本地保证 `pnpm format:check`、`pnpm lint`、`pnpm test` 均为零问题**，再执行 `pnpm build` 确认可构建。项目自托管（Docker + 宿主机反代），没有云端 CI，这四步就是发布前的全部门禁。
 - 只有 lint + 格式 + 构建**发现不了算错**：纯函数（`common/utils/` 与页面 `scripts/` 下的算法）新增或改动时必须同步补 `tests/` 用例，尤其是边界与已知缺陷的回归哨兵。
 - 规则保持克制：只做错误预防与 Vue 基础检查，风格统一交给 Prettier（无分号 / 单引号 / 100 列 / 2 空格）。
 - 确需绕过某条规则时，用行内 `eslint-disable` **并写明原因**，禁止无注释地全局关闭规则。

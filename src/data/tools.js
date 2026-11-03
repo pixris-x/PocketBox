@@ -277,7 +277,7 @@ export const tools = [
     id: 'ip-subnet',
     path: '/tool/ip-subnet',
     title: 'IP 工具',
-    description: 'CIDR 子网计算、IP 归属地查询与我的公网 IP',
+    description: 'CIDR 子网计算与 IP 归属地查询',
     icon: 'shuffle',
     category: 'dev',
     tags: ['网络', 'IP'],

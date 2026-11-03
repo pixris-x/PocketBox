@@ -1,12 +1,6 @@
 @host = http://localhost:5048
 
-### 我的公网 IP
-GET {{host}}/api/ip
-Accept: application/json
-
-###
-
-### 我的公网 IP + 归属地（省略 ip 参数即查请求者自己）
+### 省略 ip 参数即查请求者自己的归属地
 GET {{host}}/api/ip/region
 Accept: application/json
 

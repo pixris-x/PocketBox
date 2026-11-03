@@ -1,19 +1,18 @@
 <script setup>
-// IP 工具页：CIDR 子网计算 / IP 归属地查询 / 我的公网 IP
+// IP 工具页：CIDR 子网计算 / IP 归属地查询
 // 子网计算：纯位运算，在浏览器本地完成，算法见 common/utils/ip-subnet.js
-// 归属地与公网 IP：调用本站服务端 API（backend/PocketBox.Api），调用封装见 ./scripts/ip-api.js
+// 归属地：调用本站服务端 API（backend/PocketBox.Api），调用封装见 ./scripts/ip-api.js
 import { computed, ref } from 'vue'
 import ToolShell from '@/components/ToolShell/index.vue'
 import { copyText } from '@/common/utils/copy'
 import { describeCidr, parseCidr, sameSubnet } from '@/common/utils/ip-subnet'
-import { fetchMyIp, lookupRegion } from './scripts/ip-api'
+import { lookupRegion } from './scripts/ip-api'
 
 const messageOf = (err) => (err instanceof Error ? err.message : String(err))
 
 const TABS = [
   { label: '子网计算', value: 'subnet' },
   { label: 'IP 归属地', value: 'region' },
-  { label: '我的 IP', value: 'mine' },
 ]
 const activeTab = ref('subnet')
 
@@ -100,67 +99,12 @@ const REGION_ROWS = computed(() => {
     { label: '国家代码', value: e.isoCode || '—', copy: false },
   ]
 })
-
-// ---------- 我的公网 IP ----------
-const myIp = ref('')
-const myIpPhase = ref('idle')
-const myIpError = ref('')
-const myRegion = ref(null)
-const myRegionPhase = ref('idle')
-const myRegionError = ref('')
-
-async function queryMyIp() {
-  myIpPhase.value = 'loading'
-  myIpError.value = ''
-  myRegion.value = null
-  myRegionPhase.value = 'idle'
-  try {
-    myIp.value = await fetchMyIp()
-    myIpPhase.value = 'ready'
-    // 归属地是附加信息，单独加载，不拖慢 IP 本身的展示
-    queryMyRegion()
-  } catch (err) {
-    myIp.value = ''
-    myIpPhase.value = 'error'
-    myIpError.value = messageOf(err)
-  }
-}
-
-async function queryMyRegion() {
-  if (!myIp.value) return
-  if (myIpIsV6.value) {
-    // 离线库只收录 IPv4，不必白跑一次请求换回一个必然的 400
-    myRegionPhase.value = 'unsupported'
-    return
-  }
-
-  myRegionPhase.value = 'loading'
-  myRegionError.value = ''
-  try {
-    myRegion.value = await lookupRegion(myIp.value)
-    myRegionPhase.value = 'ready'
-  } catch (err) {
-    myRegionPhase.value = 'error'
-    myRegionError.value = messageOf(err)
-  }
-}
-
-const myIpIsV6 = computed(() => myIp.value.includes(':'))
-
-const REGION_ROWS_FOR_MY_IP = computed(() => {
-  const e = myRegion.value
-  if (!e?.found) return []
-  return [
-    { label: '归属地', value: describeRegion(e), copy: true },
-    { label: '运营商', value: e.isp || '—', copy: false },
-  ]
-})
 </script>
 
 <template>
   <ToolShell
     title="IP 工具"
-    description="CIDR 子网计算、IP 归属地查询与公网 IP 探测。子网计算在浏览器本地完成；归属地与公网 IP 由本站服务端提供，不经任何第三方。"
+    description="CIDR 子网计算与 IP 归属地查询。子网计算在浏览器本地完成；归属地由本站服务端提供，不经任何第三方。"
   >
     <div class="ip-tabs">
       <UiTabs v-model="activeTab" :tabs="TABS" />
@@ -236,7 +180,7 @@ const REGION_ROWS_FOR_MY_IP = computed(() => {
     </template>
 
     <!-- IP 归属地 -->
-    <template v-else-if="activeTab === 'region'">
+    <template v-else>
       <UiCard>
         <UiSection title="查询 IP 归属地">
           <UiInput
@@ -300,76 +244,6 @@ const REGION_ROWS_FOR_MY_IP = computed(() => {
         <p>
           数据来自 ip2region 离线库（Apache-2.0 /
           MIT），内置于本站服务端。库随版本更新，数据有滞后属正常。
-        </p>
-      </UiCard>
-    </template>
-
-    <!-- 我的公网 IP -->
-    <template v-else>
-      <UiCard>
-        <UiSection title="我的公网 IP">
-          <UiButton :disabled="myIpPhase === 'loading'" @click="queryMyIp">
-            <UiIcon name="refresh" :size="15" />
-            {{ myIpPhase === 'loading' ? '查询中…' : '查询我的公网 IP' }}
-          </UiButton>
-
-          <p v-if="myIpPhase === 'error'" class="ip-error">
-            <UiIcon name="alert-circle" :size="14" />
-            {{ myIpError }}
-          </p>
-
-          <div v-else-if="myIp" class="ip-mine">
-            <span class="ip-mine__ip">{{ myIp }}</span>
-            <UiButton
-              variant="secondary"
-              size="sm"
-              @click="copyText(myIp, { successMsg: '已复制' })"
-            >
-              <UiIcon name="copy" :size="14" />
-              复制
-            </UiButton>
-          </div>
-
-          <p v-else class="ip-hint">
-            由本站服务端读取连接来源后回报，不经过任何第三方，你的 IP 不会落到别人手里。
-          </p>
-        </UiSection>
-      </UiCard>
-
-      <UiCard v-if="myIp">
-        <UiSection title="归属地">
-          <p v-if="myRegionPhase === 'unsupported'" class="ip-hint">
-            当前是 IPv6 地址，归属地库只收录 IPv4，可复制后另行查询。
-          </p>
-          <p v-else-if="myRegionPhase === 'error'" class="ip-error">
-            <UiIcon name="alert-circle" :size="14" />
-            {{ myRegionError }}
-          </p>
-          <p v-else-if="myRegionPhase === 'loading'" class="ip-hint">正在查询归属地…</p>
-          <ul v-else-if="myRegion?.found" class="ip-list">
-            <li v-for="row in REGION_ROWS_FOR_MY_IP" :key="row.label" class="ip-row">
-              <span class="ip-row__label">{{ row.label }}</span>
-              <span class="ip-row__value">{{ row.value }}</span>
-              <UiButton
-                v-if="row.copy"
-                variant="secondary"
-                size="sm"
-                @click="copyText(row.value, { successMsg: '已复制' })"
-              >
-                <UiIcon name="copy" :size="14" />
-                复制
-              </UiButton>
-            </li>
-          </ul>
-          <p v-else class="ip-hint">归属地库中没有该地址的记录。</p>
-        </UiSection>
-      </UiCard>
-
-      <UiCard class="ip-tip">
-        <UiIcon name="info" :size="16" />
-        <p>
-          出口 IP 由服务端从连接或反向代理头（X-Real-IP /
-          X-Forwarded-For）读取，仅用于这一次响应，不写日志。
         </p>
       </UiCard>
     </template>

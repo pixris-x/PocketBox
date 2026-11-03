@@ -1,11 +1,10 @@
 namespace PocketBox.Api.Services;
 
 /// <summary>
-/// 取访问者的公网地址：优先读反向代理写入的头（见 deploy/nginx.conf），
-/// 直连时回落连接地址。
+/// 取访问者的公网地址：优先读反向代理写入的头，直连时回落连接地址。
 ///
 /// 注意 X-Real-IP / X-Forwarded-For 都可以被客户端伪造，所以这里成立的前提是
-/// API 容器只经由 nginx 访问、端口不对公网暴露。若将来直接发布容器端口，
+/// API 容器只经由宿主机反代访问、端口不对公网暴露。若将来直接发布容器端口，
 /// 必须改成只信任固定代理地址（用 ASP.NET Core 的 ForwardedHeaders 中间件 + KnownProxies）。
 /// </summary>
 public static class ClientIp

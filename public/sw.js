@@ -103,8 +103,8 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
-  // /api/ 不交给 SW 管：API 响应一旦被缓存就会一直返回过期的出口 IP。
-  // 该路径由后端服务提供（见 docker-compose 与 deploy/nginx.conf 的分流），不走静态缓存策略。
+  // /api/ 不交给 SW 管：API 响应一旦被缓存就会一直返回过期数据（归属地库随版本更新）。
+  // 该路径由后端服务提供（经宿主机反代分流到 API 容器），不走静态缓存策略。
   if (url.pathname.startsWith('/api/')) return
 
   if (url.pathname.startsWith('/assets/')) {

@@ -31,7 +31,7 @@ builder.Services.AddOpenApi(options =>
         {
             document.Info.Title = "PocketBox API";
             document.Info.Version = "v1";
-            document.Info.Description = "口袋工具箱后端接口：IP 归属地查询与访客 IP 探测。";
+            document.Info.Description = "口袋工具箱后端接口：IP 归属地查询。";
             return Task.CompletedTask;
         }
     );
